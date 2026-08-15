@@ -1,0 +1,21 @@
+-R src LXConfl
+-R src/Metalib Metalib
+src/infra_nom.v
+src/aeq_equiv_es.v
+src/msubst.v
+src/ZtoConfl_nom.v
+src/lx_nom.v
+src/Metalib/AssocList.v
+src/Metalib/CoqEqDec.v
+src/Metalib/CoqFSetDecide.v
+src/Metalib/CoqFSetInterface.v
+src/Metalib/CoqListFacts.v
+src/Metalib/CoqUniquenessTacEx.v
+src/Metalib/CoqUniquenessTac.v
+src/Metalib/FSetExtra.v
+src/Metalib/FSetWeakNotin.v
+src/Metalib/LibDefaultSimp.v
+src/Metalib/LibLNgen.v
+src/Metalib/LibTactics.v
+src/Metalib/MetatheoryAtom.v
+src/Metalib/Metatheory.v
