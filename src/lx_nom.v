@@ -676,7 +676,30 @@ Proof.
                     ****** apply notin_P; assumption.
                     ****** apply notin_union.
                     ******* simpl. apply notin_remove_2. apply notin_P; assumption.
-                    ******* apply notin_singleton. symmetry; assumption.
+                    ******* apply    (* apply refltrans_composition with (n_app (B (n_abs x n)) t2).
+        * apply refltrans_n_app_left_lx. apply IH1.
+          ** simpl. lia.
+          ** assumption.
+        * simpl. apply refltrans_composition with  ([x := t2](B n)).
+          ** apply refltrans_lx_b. apply rtrans with ([x := t2] B n); try apply refltrans_refl. apply step_redex. apply betax_aeq_step with (n_app (n_abs x (B n)) t2) ([x := t2] B n).
+             *** apply aeq_refl.
+            *** apply step_betax.
+            *** apply aeq_refl.
+          ** apply refltrans_composition with ([x := B t2] B n).
+             *** apply refltrans_n_sub_in_lx. apply IH1.
+                **** simpl. lia.
+                **** assumption.
+             *** apply refltrans_lx_x. apply pure_scx. apply pure_B. inversion H1; subst. assumption.
+      + change (B (n_app (n_app n1 n2) t2)) with (n_app (B (n_app n1 n2)) (B t2)). apply refltrans_n_app_lx.
+        * apply IH1.
+          ** simpl. lia.
+          ** assumption.
+        * apply IH1.
+          ** simpl. lia.
+          ** assumption. 
+      + inversion H1. *)
+Qed.
+ notin_singleton. symmetry; assumption.
                **** apply aeq_abs_same. apply aeq_m_subst_out. apply aeq_sym. apply aeq_swap_P. 
            *** assumption.
     + apply aeq_P in H. apply aeq_P in H1. simpl in *. rewrite m_subst_app in H. apply aeq_trans with (n_app ({y := P t3} P t1) ({y := P t3} P t2)); assumption.
