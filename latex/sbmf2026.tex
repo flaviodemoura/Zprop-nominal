@@ -18,6 +18,14 @@
 \makeatletter
 \newcommand{\coqsrcline}[3]{\@namedef{coqsrc@#1}{#2\#L#3}}
 \newcommand{\coqsrclink}[2]{\@ifundefined{coqsrc@#1}{#2}{\href{\coqsrcbase\@nameuse{coqsrc@#1}}{#2}}}
+% Link text to a definition in the repository, by its file and Rocq name:
+% \rocqsrc{aeq_equiv_es.aeq}{text}. Warns if the name is unknown.
+% The starred form \rocqsrc* puts the Rocq mark (rocq-mark.pdf) before the
+% text, as in Apinis and Ahman, "A simple formalization of alpha-equivalence".
+\newcommand{\rocqmark}{\raisebox{-0.08em}{\includegraphics[height=0.72em]{rocq-mark}}}
+\NewDocumentCommand{\rocqsrc}{s m m}{\@ifundefined{coqsrc@#2}
+  {\PackageWarning{rocqsrc}{Unknown Rocq definition `#2'}#3}
+  {\coqsrclink{#2}{\IfBooleanT{#1}{\rocqmark\nobreakspace}#3}}}
 \makeatother
 \input{coqsrclinks}
 % Only the Rocq logo on each box is a link; the code itself is plain text.

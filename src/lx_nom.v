@@ -539,8 +539,10 @@ Proof.
  \item $(x = y)$: $[y := t_2](\lambda_y.t_1') \longrightarrow_{abs1} \lambda_y.t_1' = \metasub{(\lambda_y.t_1')}{y}{t_2}$.
  \item $(x \neq y)$: Consider the following subcases:
   \begin{enumerate}
-   \item Let $z$ be a fresh variable. If $y\in fv(t_2)$ then $[x := t_2](\lambda_y.t_1') \longrightarrow_{abs3} \lambda_z. [x := t_2](\swap{y}{z}{t_1'}) \tto_x^{(i.h.)} \lambda_z.\metasub{(\swap{y}{z}{t_1'})}{x}{t_2} \stackrel{(\star)}{=_\alpha}  \metasub{(\lambda_y.t_1')}{x}{t_2}$.
-   \item if $y\notin fv(t_2)$ then $[x := t_2](\lambda_y.t_1') \longrightarrow_{abs2} \lambda_y.([x := t_2] t_1') \tto_x^{(i.h.)} \lambda_y.(\metasub{t_1'}{x}{t_2}) \stackrel{(\star)}{=_\alpha}  \metasub{(\lambda_y.t_1')}{x}{t_2}$. 
+   \item Let $z$ be a fresh variable, and suppose that $y\in fv(t_2)$. Then
+     $\begin{array}{llll}
+       [x := t_2](\lambda_y.t_1') & \longrightarrow_{abs3} &       \lambda_z. [x := t_2](\swap{y}{z}{t_1'}) & \tto_x^{(i.h.)} \\ \lambda_z.\metasub{(\swap{y}{z}{t_1'})}{x}{t_2} & \stackrel{(\star)}{=_\alpha} & \metasub{(\lambda_y.t_1')}{x}{t_2}. & \end{array}$
+   \item If $y\notin fv(t_2)$ then $[x := t_2](\lambda_y.t_1') \longrightarrow_{abs2} \lambda_y.([x := t_2] t_1') \tto_x^{(i.h.)} \lambda_y.(\metasub{t_1'}{x}{t_2}) \stackrel{(\star)}{=_\alpha}  \metasub{(\lambda_y.t_1')}{x}{t_2}$. 
   \end{enumerate}
 \noindent where the ($\star$) step (in both subcases) is intuitively simple but has a tricky proof since the definition (\ref{msubst}) of metasubstitution systematically renames variables whenever it crosses an abstraction. \hfill$\Box$
  \end{enumerate}% %\end{proofbox}% *)
@@ -572,11 +574,12 @@ Proof.
       + apply refltrans_composition with ([x := P t2] P t1).
         * apply refltrans_n_sub_in. assumption.
         * apply pure_scx. apply pure_P.
-(** %\begin{proofbox}% The proof is by induction on the term [t]. The interesting case is when [t] is an explicit substitution, i.e., $t = \esub{t_1}{x}{t_2}$. In this case, we have to show that $\esub{t_1}{x}{t_2} \tto_x P(\esub{t_1}{x}{t_2}) =  \metasub{(P\ t_1)}{x}{P\ t_2}$. This is done as follows:
+(** %\begin{proofbox}% The proof is by induction on [t]. The interesting case is when [t] is an explicit substitution, i.e., [t] = $\esub{t_1}{x}{t_2}$. In this case, we have to show that %\[\esub{t_1}{x}{t_2} \tto_x P(\esub{t_1}{x}{t_2})\]%
+%\noindent% where $P(\esub{t_1}{x}{t_2}) = \metasub{(P\ t_1)}{x}{P\ t_2}$ by definition of $P$. This is done as follows:
 %\begin{mathpar}{\scriptsize 
  \inferrule*[right={(T)}]{\inferrule{(\star)}{\esub{t_1}{x}{t_2} \tto_x \esub{(P\ t_1)}{x}{P\ t_2}} \and \inferrule{(\star\star)}{\esub{(P\ t_1)}{x}{P\ t_2} \tto_x \metasub{(P\ t_1)}{x}{P\ t_2}}}{\esub{t_1}{x}{t_2} \tto_x \metasub{(P\ t_1)}{x}{P\ t_2}}}
 \end{mathpar}
-\noindent% where (T) is a transitivity step and $(\star)$ is proved by the induction hypothesis and $(\star\star)$, by Lemma [pure_scx], since $P\ t_1$ is pure by Lemma [pure_P]. $\hfill\Box$ %\end{proofbox}% *)
+\noindent% where (T) is a transitivity step, $(\star)$ follows from the induction hypothesis for $t_1$ and $t_2$, since $\tto_x$ is compatible with explicit substitutions, and $(\star\star)$ follows from Lemma [pure_scx], since $P\ t_1$ is pure by Lemma [pure_P]. $\hfill\Box$ %\end{proofbox}% *)
 Qed.
 
 (** Therefore, Lemma [refltrans_P] proves the blue arrows in %(\ref{lx:zprop-proof})%. The proof that $P\ t_1 \tto_x P\ t_2$ (green arrow in %(\ref{lx:zprop-proof})%) is obtained by Lemma [scx_P] below. Note that the complete permutation $P$ replaces every explicit substitution in the input term $t$ with the corresponding metasubstitution in the output $P\ t$. Some auxiliary results are needed for [scx_P]. The important ones are: *)
@@ -647,8 +650,7 @@ Proof.
       * rewrite (swap_symmetric _ y x). apply aeq_swap_P.
 Qed.
 
-(** Lemma [aeq_swap_P] is proved by induction on the term [t], while [aeq_P] is by induction on the $\alpha$-equivalence relation. We are now ready to prove Lemma [scx_P] using induction on the reduction $t_1 \to_x t_2$: 
- *)
+(** %\noindent% Lemma [aeq_swap_P] is proved by induction on [t], and Lemma [aeq_P], by induction on the derivation [t1 =α t2]. We omit their proofs to save space. *)
 
 Lemma scx_P: forall t1 t2, (t1 →x t2) -> (P t1) =α (P t2).
 Proof.
@@ -695,15 +697,15 @@ Proof.
     + apply aeq_refl.
     + assumption.
 Qed.
-(** %\begin{proofbox} \flavio{TBC}% The proof is by induction on the reduction $t_1 \to_x t_2$. The non trivial case is when $t_1 \to_{abs3} t_2$. In this case, $t_1 =_{\alpha} \esub{(\lambda_x.t_1')}{y}{t_2'} \to_{abs3} \lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'} =_{\alpha} t_2$, where $x \neq y$ and $z$ is a fresh variable. In this case, the proof is as follows:
-%\begin{mathpar}{\scriptsize
- \inferrule*[right={(t)}]{\inferrule*[left={$(\nabla)$}]{t_1 =_{\alpha} \esub{(\lambda_x.t_1')}{y}{t_2'}}{P\ t_1 =_{\alpha} P\ (\esub{(\lambda_x.t_1')}{y}{t_2'})} \!\!\!\!\and\!\!\!\! \inferrule*[right={(t)}]{(\star) \and \inferrule*[right={$(\nabla)$}]{\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'} =_{\alpha} t_2}{P\ (\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'}) =_{\alpha} P\ t_2} }{P\ (\esub{(\lambda_x.t_1')}{y}{t_2'}) =_{\alpha} P\ t_2}}{P\ t_1 =_{\alpha} P\ t_2}}
-\end{mathpar}%
-%\noindent% where (T) denotes a transitivity step, $(\nabla)$ corresponds to an application of lemma [aeq_P], and  $(\star)$ is given by
+(** %\begin{proofbox}% The proof is by induction on the reduction [(t1 →x t2)]. The non-trivial case is when [t1] $\to_{abs3}$ [t2]. In this case, %\vspace{0.3cm}%
+
+ [t1] $= \esub{(\lambda_x.t_1')}{y}{t_2'} \to_{abs3} \lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'} =$ [t2], %\vspace{0.3cm}%
+
+%\noindent% where $x \neq y$ and $z$ is a fresh variable. We proceed as follows:
 %\begin{mathpar}{\scriptsize
  \inferrule*[right={(def. $P$)}]{\inferrule*[right={$(aeq\_swap\_P)$}]{\inferrule*[right={$(\diamond)$}]{~}{\metasub{\lambda_x.(P\ t_1')}{y}{P\ t_2'} =_{\alpha}  \lambda_z.\metasub{(\swap{x}{z}{P\ t_1'})}{y}{P\ t_2'}}}{\metasub{\lambda_x.(P\ t_1')}{y}{P\ t_2'} =_{\alpha}  \lambda_z.\metasub{P\ (\swap{x}{z}{t_1'})}{y}{P\ t_2'}}} {P\ (\esub{(\lambda_x.t_1')}{y}{t_2'}) =_{\alpha} P\ (\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'})}} 
-\end{mathpar}%
- %\noindent% where $(\diamond)$ corresponds to an application of lemma [aeq_m_subst_abs_neq]. %\hfill% $\Box$ %\end{proofbox}%
+\end{mathpar}
+\noindent% where $(\diamond)$ corresponds to an application of lemma [aeq_m_subst_abs_neq]. %\hfill% $\Box$ %\end{proofbox}%
 
 The red arrow in %(\ref{lx:zprop-proof})% is proved by Lemma [pure_refltrans_B] below, which is proved by induction on the size of the term [t]: *)
 

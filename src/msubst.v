@@ -662,6 +662,8 @@ Proof.
 Qed.
 (* end hide *)
 
+(** The next lemma shows how the metasubstitution propagates through an abstraction whose bound variable [y] is different from the variable [x] being replaced: up to $\alpha$-equivalence, the bound variable is renamed to a fresh variable [z]. This renaming prevents the free variables of [u] from being captured by the abstraction: *)
+
 Lemma aeq_m_subst_abs_neq: forall t u x y z, x <> y -> z `notin` fv_nom u `union` fv_nom (n_abs y t) `union` {{x}} -> {x := u}(n_abs y t) =α n_abs z ({x := u}(swap y z t)).
 Proof.
   intros t u x y z H1 H2. unfold m_subst. rewrite subst_rec_fun_equation. destruct (x == y).
