@@ -9,7 +9,7 @@ Require Export Metalib.LibLNgen.
 Require Import infra_nom.
 (* end hide *)
 
-(** In the $\lambda$-calculus, terms that differ only by the name of bound variables are considered equivalent. This equivalence is called $\alpha$-equivalence, and it is defined by the following inference rules (cf. %\cite{pittsNominalLogicFirst2003}%):
+(** In the $\lambda$-calculus, terms that differ only by the name of bound variables are considered equivalent. This equivalence is called $\alpha$-equivalence, and it is defined by the following inference rules (cf. %\cite{urbanNominalUnification2004}%):
 
 %\begin{mathpar}
 \inferrule*[Left={({\rm\it aeq\_var})}]{~}{x =_\alpha x} \and\and \inferrule*[Right={({\rm\it aeq\_abs\_same})}]{t_1 =_\alpha t_2}{\lambda_x.t_1 =_\alpha \lambda_x.t_2} \\
@@ -17,7 +17,7 @@ Require Import infra_nom.
 \inferrule*[Right={({\rm\it aeq\_app})}]{t_1 =_\alpha t_1' \and t_2 =_\alpha t_2'}{t_1\ t_2 =_\alpha t_1'\ t_2'}
 \end{mathpar}%
 
-We extend this definition to explicit substitutions by adding the following rules:
+In %\cite{limaFormalizedExtensionSubstitution2023}%, this definition was extended to explicit substitutions by adding the following rules:
 
 %\begin{mathpar}
   \inferrule*[Right={({\rm\it aeq\_sub\_same})}]{t_1 =_\alpha t_1' \and t_2 =_\alpha t_2'}{\esub{t_1}{x}{t_2} =_\alpha \esub{t_1'}{x}{t_2'}} \\

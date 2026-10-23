@@ -924,29 +924,6 @@ Proof.
             *** apply notin_union_3; try apply fv_nom_remove; default_simp.
 Qed. 
 
-(* In fact, the need of the lemma [aeq_swap_subst_rec_fun] in the proofs of the two previous lemmas is justified by the fact that when the $\alpha$-equation involves abstractions with different binders, or explicit substitutions with different binders, the rules [aeq_abs_diff] and [aeq_sub_diff] introduce swaps that are outside the metasubstitutions. *)
-
-(* This is the intended behaviour of the metasubstitution *)
-(* Lemma fv_nom_metasub: forall t u x,  x `notin` (fv_nom t) ->  fv_nom ({x := u}t) [=] fv_nom t.
-Proof. 
-  induction t.
-  - intros u x' Hfv. simpl in *. apply notin_singleton_1 in Hfv. unfold m_subst. rewrite subst_rec_fun_equation. destruct (x' == x).
-    + subst. contradiction.
-    + simpl. reflexivity.
-  - intros u x' Hfv. simpl in *. case (x' == x).
-    + intro Heq. subst. rewrite m_subst_abs_eq. simpl. reflexivity.
-    + intro Hneq. unfold m_subst in *. rewrite subst_rec_fun_equation. destruct (x' == x).
-      * contradiction.
-      * destruct (atom_fresh (union (fv_nom u) (union (fv_nom (n_abs x t)) (singleton x')))). simpl. case (x0 == x).
-        ** intro Heq. subst. apply AtomSetProperties.Equal_remove. rewrite swap_id. apply IHt. apply notin_remove_1 in Hfv. destruct Hfv.
-           *** symmetry in H. contradiction.
-           *** assumption.
-        ** intro Hneq'. apply notin_remove_1 in Hfv. destruct Hfv.
-           *** symmetry in H. contradiction.
-           *** apply (IHt u) in H. apply notin_union_2 in n0. apply notin_union_1 in n0. simpl in n0. apply notin_remove_1 in n0. destruct n0.
-               **** symmetry in H0. contradiction.
-               **** apply (IHt u) in H0. Admitted. *)             
-
 Lemma aeq_m_subst_out_neq: forall t1 t1' t2 x y, x <> y -> x `notin` (fv_nom t1') -> t1 =α (swap x y t1') -> ({x := t2}t1) =α ({y := t2}t1').
 Proof. 
  intros t1 t1' t2 x y Hneq Hnotin Haeq. apply aeq_trans with ({x := t2} swap x y t1').

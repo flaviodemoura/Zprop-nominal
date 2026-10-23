@@ -79,13 +79,7 @@ Qed.
 
 (** * Introduction *)
 
-(** We present a framework for studying properties of extensions of the $\lambda$-calculus%\cite{barendregtLambdaCalculusIts1984a}%, which is based on a nominal approach %\cite{gabbayNewApproachAbstract2002}%. In the nominal setting, variables are represented by atoms, structureless entities with a decidable equality:
-
-<<
-Parameter eq_dec : forall x y : atom, {x = y} + {x <> y}.
->>
-
-%\noindent% therefore different names mean different atoms and different variables. The nominal approach is close to the usual paper and pencil notation used in $\lambda$-calculus, whose grammar of terms is given by:
+(** We present a framework for studying properties of extensions of the $\lambda$-calculus %\cite{barendregtLambdaCalculusIts1984a}%, which is based on a nominal approach %\cite{gabbayNewApproachAbstract2002}%. In the nominal setting, variables are represented by atoms, structureless entities with a decidable equality. Therefore different names mean different atoms and different variables. The nominal approach is close to the usual paper and pencil notation used in $\lambda$-calculus, whose grammar of terms is given by:
 
 %\begin{equation}\label{lambda:grammar}
  t ::= x \mid \lambda_x.t \mid t\ t
@@ -125,11 +119,14 @@ In the previous example, the variable capture can be avoided by applying a swap 
   \lambda_x.t_1, & \mbox{ if } t = \lambda_x.t_1; \\
   \lambda_z.(\metasub{(\swap{y}{z}{t_1})}{x}{u}), & \mbox{ if } t = \lambda_y.t_1, x \neq y \\ & \mbox{ and } \\ & z\notin fv(t\ u) \cup \{x\}.
  \end{array}\right.
-\end{equation}%
-*)
+\end{equation}
+\noindent% where $fv(t)$ denotes the set of free variables of $t$. The last case of the definition of metasubstitution is the one that avoids variable capture by applying a swap to the body of the abstraction before performing the metasubstitution. In this case, $z$ is a fresh variable that does not occur free in $t$ or in $u$, and it can be chosen arbitrarily. In our formalization, we will use a function called [atom_fresh] to choose such a fresh variable.
 
-(*
-In what follows, we will adopt a mixed-notation approach, intertwining metanotation with the equivalent Coq notation. This strategy aids in elucidating the proof steps of the upcoming lemmas, enabling a clearer and more detailed comprehension of each stage in the argumentation. The corresponding Coq code for the swapping of variables, named [vswap], is defined as follows: *) 
+%\flavio{The main contributions of this work are as follows}%:
+- formalization of the compositional Z property in the nominal setting;
+- formalization of the confluence property of the $\lambda_x$-calculus with explicit substitutions via the compositional Z property.
+
+To the best of our knowledge this is the first formalization of the compositional Z property. %\flavio{The rest of the paper is organized as follows:}% In Section 2, we present the (compositional) Z Property. In Section 3, we present the $\lambda_x$-calculus and the confluence proof via the compositional Z property. In Section 4, we conclude and discuss future work. *)
 (* begin hide *)
 Definition vswap (x:atom) (y:atom) (z:atom) := if (z == x) then y else if (z == y) then x else z.
 
@@ -190,7 +187,7 @@ Qed.
 
 Calculi with explicit substitutions are formalisms that deconstruct the metasubstitution operation into finer-grained steps, thereby functioning as an intermediary between the $\lambda$-calculus and its practical implementations: they shed light on the execution models of higher-order languages. In fact, developing a calculus with explicit substitutions that is faithful to the $\lambda$-calculus, in the sense of preserving some of its desired properties, has been the main motivation behind the long list of calculi with explicit substitutions invented over the last decades %\cite{abadiExplicitSubstitutions1991,roseExplicitSubstitutionNames2011,benaissaLnCalculusExplicit1996,curienConfluencePropertiesWeak1996,munozConfluencePreservationStrong1996,kamareddineExtendingLcalculusExplicit1997a,blooExplicitSubstitutionEdge1999,davidLambdacalculusExplicitWeakening2001,kesnerTheoryExplicitSubstitutions2009a}%.
 
-The following inductive definition corresponds to the grammar (%\ref{es:grammar}%), where the explicit substitution constructor, named [n_sub], has a special notation. Instead of writing [n_sub t x u], we will write [[x := u] t] similarly to (%\ref{es:grammar}%). Accordingly, [n_sexp] denotes the set of nominal $\lambda$-expressions equipped with an explicit substitution operator, which, for simplicity, we will refer to as just "terms". *)
+The following inductive definition corresponds to the grammar (%\ref{es:grammar}%), where the explicit substitution constructor, named [n_sub], has a special notation. Instead of writing [n_sub t x u], we will write [[x := u] t] similarly to (%\ref{es:grammar}%). Accordingly, [n_sexp] denotes the set of nominal $\lambda$-expressions equipped with an explicit substitution operator, which, for simplicity, we will refer to as just "terms". Note that all code snippets are clickable and linked to their source repository. *)
 
 Inductive n_sexp : Set :=
 | n_var (x:atom)

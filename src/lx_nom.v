@@ -44,7 +44,7 @@ Qed.
 
 (** * The $\lambda_x$ calculus with explicit substitutions *)
 
-(** In this section, we formalize a version of the $\lambda_x$-calculus%\cite{linsNewFormulaExecution1986,linsPartialCategoricalMulticombinators1992,roseExplicitCyclicSubstitutions1992,blooPreservationStrongNormalisation1995}% in a nominal framework and prove its confluence via the compositional Z property%\cite{nakazawaCompositionalConfluenceProofs2016}%. This task can be seen as an application of our formalizations of the compositional Z property %\cite{fmm2021}% and the extension of the substitution lemma for calculi with explicit substitutions %\cite{limaFormalizedExtensionSubstitution2023}%.
+(** In this section, we formalize a version of the $\lambda_x$-calculus %\cite{linsNewFormulaExecution1986,linsPartialCategoricalMulticombinators1992,roseExplicitCyclicSubstitutions1992,blooPreservationStrongNormalisation1995}% in a nominal framework and prove its confluence via the compositional Z property %\cite{nakazawaCompositionalConfluenceProofs2016}%. This task can be seen as an application of our formalizations of the compositional Z property %\cite{fmm2021}% and the extension of the substitution lemma for calculi with explicit substitutions %\cite{limaFormalizedExtensionSubstitution2023}%.
 
 As discussed in the introduction, calculi with explicit substitutions deconstruct the $\beta$-reduction into finer-grained steps, thereby functioning as an intermediary between the $\lambda$-calculus and its practical implementations. In the $\lambda_x$-calculus, the core idea is that $\beta$-reduction is divided into two parts, one that initiates the simulation of the $\beta$-step, and another that completes the simulation, as suggested by the following figure:
 
@@ -299,6 +299,7 @@ The proof strategy is similar to  %\cite{nakazawaCompositionalConfluenceProofs20
 For the $\lambda_x$-calculus, we take $R$ as the reduction relation $\to_{lx}$, and [f] as the composition of two functions, the complete permutation [P] and the complete development [B], recursively defined as:
 *)
 
+(** %\noindent\begin{minipage}[t]{0.485\textwidth}\tcbset{coqdoc local/.style={unbreakable,left=5pt,right=4pt,equal height group=PB,fontupper=\scriptsize}}% *)
 Fixpoint P (t : n_sexp) :=
   match t with
   | n_var x => n_var x
@@ -306,7 +307,7 @@ Fixpoint P (t : n_sexp) :=
   | n_app t1 t2 => n_app (P t1) (P t2)
   | n_sub t1 x t2 => {x := (P t2)}(P t1)
   end.
-
+(** %\end{minipage}\hfill\begin{minipage}[t]{0.495\textwidth}\tcbset{coqdoc local/.style={unbreakable,left=5pt,right=4pt,equal height group=PB,fontupper=\scriptsize}}% *)
 Fixpoint B (t : n_sexp) :=
   match t with
   | n_var x => n_var x
@@ -318,8 +319,9 @@ Fixpoint B (t : n_sexp) :=
       end
   | n_sub t1 x t2 => n_sub (B t1) x (B t2)
   end.
+(** %\end{minipage}\par\medskip% *)
 
-(** The complete permutation function [P] and the complete development [B] have several interesting properties. In what follows, we will list the most relevant ones to show how to get the confluence proof for the $\lambda_x$-calculus. The first point to be noticed is that [P t] removes all explicit substitution of [t], therefore [P t] is a pure term, that is proved by induction on [t]:
+(** The complete permutation function [P] and the complete development [B] have several interesting properties. In what follows, we will list the most relevant ones to show how to obtain the confluence proof for the $\lambda_x$-calculus, and we will sketch the proofs of only the more interesting ones. The first point to be noticed is that [P t] removes all explicit substitution of [t], therefore [P t] is a pure term, that is proved by induction on [t]:
  *)
 
 Lemma pure_P: forall t, pure (P t).
@@ -532,16 +534,16 @@ Proof.
                     *********** do 2 apply notin_union_2 in Fr. apply notin_union_1 in Fr. apply notin_singleton_1 in Fr. symmetry; assumption.
                     *********** repeat apply notin_union_2 in Hnotin'. apply notin_singleton_1 in Hnotin'. symmetry; assumption.
                     ********** apply aeq_sym. apply aeq_swap_m_subst.                      
-  (** %\noindent {\bf Proof.}% The proof is by induction on the size of the term [t1], and the interesting case is the abstraction case, i.e., when $t_1 = \lambda_y.t_1'$ and we need to prove that $[x := t_2](\lambda_y.t_1') \tto_x \metasub{(\lambda_y.t_1')}{x}{t_2}$. There are two cases:
+  (** %\begin{proofbox}% The proof is by induction on the size of the term [t1], and the interesting case is the abstraction case, i.e., when $t_1 = \lambda_y.t_1'$ and we need to prove that $[x := t_2](\lambda_y.t_1') \tto_x \metasub{(\lambda_y.t_1')}{x}{t_2}$. There are two cases:
 %\begin{enumerate}
  \item $(x = y)$: $[y := t_2](\lambda_y.t_1') \longrightarrow_{abs1} \lambda_y.t_1' = \metasub{(\lambda_y.t_1')}{y}{t_2}$.
  \item $(x \neq y)$: Consider the following subcases:
   \begin{enumerate}
-   \item if $y\in fv(t_2)$ then let $z$ be a fresh variable: $[x := t_2](\lambda_y.t_1') \longrightarrow_{abs3} \lambda_z. [x := t_2](\swap{y}{z}{t_1'}) \tto_x^{(i.h.)} \lambda_z.\metasub{(\swap{y}{z}{t_1'})}{x}{t_2} \stackrel{(\star)}{=_\alpha}  \metasub{(\lambda_y.t_1')}{x}{t_2}$.
+   \item Let $z$ be a fresh variable. If $y\in fv(t_2)$ then $[x := t_2](\lambda_y.t_1') \longrightarrow_{abs3} \lambda_z. [x := t_2](\swap{y}{z}{t_1'}) \tto_x^{(i.h.)} \lambda_z.\metasub{(\swap{y}{z}{t_1'})}{x}{t_2} \stackrel{(\star)}{=_\alpha}  \metasub{(\lambda_y.t_1')}{x}{t_2}$.
    \item if $y\notin fv(t_2)$ then $[x := t_2](\lambda_y.t_1') \longrightarrow_{abs2} \lambda_y.([x := t_2] t_1') \tto_x^{(i.h.)} \lambda_y.(\metasub{t_1'}{x}{t_2}) \stackrel{(\star)}{=_\alpha}  \metasub{(\lambda_y.t_1')}{x}{t_2}$. 
   \end{enumerate}
 \noindent where the ($\star$) step (in both subcases) is intuitively simple but has a tricky proof since the definition (\ref{msubst}) of metasubstitution systematically renames variables whenever it crosses an abstraction. \hfill$\Box$
- \end{enumerate}% *)               
+ \end{enumerate}% %\end{proofbox}% *)
   - intros x t2 Hpure. apply rtrans with (n_app ([x := t2]t1') ([x := t2]t2')).
     + apply step_redex. apply scx_aeq_step with ([x := t2] n_app t1' t2') (n_app ([x := t2] t1') ([x := t2] t2')).
       * apply aeq_refl.
@@ -570,13 +572,11 @@ Proof.
       + apply refltrans_composition with ([x := P t2] P t1).
         * apply refltrans_n_sub_in. assumption.
         * apply pure_scx. apply pure_P.
-(** %\noindent {\bf Proof.}% The proof is by induction on the term [t]. The interesting case is when [t] is an explicit substitution, i.e., $t = \esub{t_1}{x}{t_2}$. In this case, we have to show that $\esub{t_1}{x}{t_2} \tto_x P(\esub{t_1}{x}{t_2}) =  \metasub{(P\ t_1)}{x}{P\ t_2}$. This is done as follows:
-
-%\begin{mathpar}
- \inferrule{\inferrule{(\star)}{\esub{t_1}{x}{t_2} \tto_x \esub{(P\ t_1)}{x}{P\ t_2}} \and \inferrule{(\star\star)}{\esub{(P\ t_1)}{x}{P\ t_2} \tto_x \metasub{(P\ t_1)}{x}{P\ t_2}}}{\esub{t_1}{x}{t_2} \tto_x \metasub{(P\ t_1)}{x}{P\ t_2}}
-\end{mathpar}%
-
-%\noindent% where $(\star)$ is proved by the induction hypothesis and $(\star\star)$, by Lemma [pure_scx], since $P\ t_1$ is pure by Lemma [pure_P]. $\hfill\Box$ *)
+(** %\begin{proofbox}% The proof is by induction on the term [t]. The interesting case is when [t] is an explicit substitution, i.e., $t = \esub{t_1}{x}{t_2}$. In this case, we have to show that $\esub{t_1}{x}{t_2} \tto_x P(\esub{t_1}{x}{t_2}) =  \metasub{(P\ t_1)}{x}{P\ t_2}$. This is done as follows:
+%\begin{mathpar}{\scriptsize 
+ \inferrule*[right={(T)}]{\inferrule{(\star)}{\esub{t_1}{x}{t_2} \tto_x \esub{(P\ t_1)}{x}{P\ t_2}} \and \inferrule{(\star\star)}{\esub{(P\ t_1)}{x}{P\ t_2} \tto_x \metasub{(P\ t_1)}{x}{P\ t_2}}}{\esub{t_1}{x}{t_2} \tto_x \metasub{(P\ t_1)}{x}{P\ t_2}}}
+\end{mathpar}
+\noindent% where (T) is a transitivity step and $(\star)$ is proved by the induction hypothesis and $(\star\star)$, by Lemma [pure_scx], since $P\ t_1$ is pure by Lemma [pure_P]. $\hfill\Box$ %\end{proofbox}% *)
 Qed.
 
 (** Therefore, Lemma [refltrans_P] proves the blue arrows in %(\ref{lx:zprop-proof})%. The proof that $P\ t_1 \tto_x P\ t_2$ (green arrow in %(\ref{lx:zprop-proof})%) is obtained by Lemma [scx_P] below. Note that the complete permutation $P$ replaces every explicit substitution in the input term $t$ with the corresponding metasubstitution in the output $P\ t$. Some auxiliary results are needed for [scx_P]. The important ones are: *)
@@ -654,19 +654,19 @@ Lemma scx_P: forall t1 t2, (t1 →x t2) -> (P t1) =α (P t2).
 Proof.
   intros t1 t2 H. induction H.
   - induction H. inversion H0; subst.
-    + apply aeq_P in H. simpl in H. rewrite m_subst_var_eq in H. apply aeq_P in H1. apply aeq_trans with (P u'); assumption.
-    + apply aeq_P in H. simpl in H. rewrite m_subst_var_neq in H.
+    + (* var *) apply aeq_P in H. simpl in H. rewrite m_subst_var_eq in H. apply aeq_P in H1. apply aeq_trans with (P u'); assumption.
+    + (* gc *) apply aeq_P in H. simpl in H. rewrite m_subst_var_neq in H.
       * apply aeq_P in H1. apply aeq_trans with (n_var x); assumption.
       * assumption.
-    + apply aeq_P in H. apply aeq_P in H1. simpl in *. rewrite m_subst_abs_eq in H. apply aeq_trans with (n_abs y (P t1)); assumption.
-    + apply aeq_P in H. apply aeq_P in H1. simpl in *. apply aeq_trans with ({y := P t2} n_abs x (P t1)).
+    + (* abs1 *) apply aeq_P in H. apply aeq_P in H1. simpl in *. rewrite m_subst_abs_eq in H. apply aeq_trans with (n_abs y (P t1)); assumption.
+    + (* abs2 *) apply aeq_P in H. apply aeq_P in H1. simpl in *. apply aeq_trans with ({y := P t2} n_abs x (P t1)).
         ** assumption.
         ** apply aeq_trans with (n_abs x ({y := P t2} P t1)).
            *** apply aeq_m_subst_n_abs_neq_notin.
                **** assumption.
                **** apply notin_P. assumption.
            *** assumption.
-    + apply aeq_P in H. apply aeq_P in H1. simpl in *. apply aeq_trans with ({y := P t2} n_abs x (P t1)).
+    + (* abs3 *) apply aeq_P in H. apply aeq_P in H1. simpl in *. apply aeq_trans with ({y := P t2} n_abs x (P t1)).
         ** assumption.
         ** apply aeq_trans with (n_abs z ({y := P t2} P (swap x z t1))).
            *** apply aeq_trans with (n_abs z ({y := P t2} (swap x z (P t1)))).
@@ -693,44 +693,43 @@ Proof.
   - simpl. apply aeq_m_subst_eq.
     + apply aeq_refl.
     + assumption.
-(** %\noindent {\bf Proof.}% The proof is by induction on the reduction $t_1 \to_x t_2$. The non trivial case is when $t_1 \to_{abs3} t_2$. In this case, $t_1 =_{\alpha} \esub{(\lambda_x.t_1')}{y}{t_2'} \to_{abs3} \lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'} =_{\alpha} t_2$, where $x \neq y$ and $z$ is a fresh variable. In this case, the proof is as follows:
-%\begin{mathpar}
- \inferrule{\inferrule{t_1 =_{\alpha} \esub{(\lambda_x.t_1')}{y}{t_2'}}{P\ t_1 =_{\alpha} P\ (\esub{(\lambda_x.t_1')}{y}{t_2'})} \and  \inferrule{(\star) \and \inferrule{\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'} =_{\alpha} t_2}{P\ (\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'}) =_{\alpha} P\ t_2} }{P\ (\esub{(\lambda_x.t_1')}{y}{t_2'}) =_{\alpha} P\ t_2}}{P\ t_1 =_{\alpha} P\ t_2}
-\end{mathpar}%
-%\noindent% where $(\star)$ is given by
-%\begin{mathpar}
- \inferrule{\inferrule{\inferrule{~}{\metasub{\lambda_x.(P\ t_1')}{y}{P\ t_2'} =_{\alpha}  \lambda_z.\metasub{(\swap{x}{z}{P\ t_1'})}{y}{P\ t_2'}}}{\metasub{\lambda_x.(P\ t_1')}{y}{P\ t_2'} =_{\alpha}  \lambda_z.\metasub{P\ (\swap{x}{z}{t_1'})}{y}{P\ t_2'}}} {P\ (\esub{(\lambda_x.t_1')}{y}{t_2'}) =_{\alpha} P\ (\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'})}
-\end{mathpar}%
- %\hfill%$\Box$
-*)
 Qed.
+(** %\begin{proofbox} \flavio{TBC}% The proof is by induction on the reduction $t_1 \to_x t_2$. The non trivial case is when $t_1 \to_{abs3} t_2$. In this case, $t_1 =_{\alpha} \esub{(\lambda_x.t_1')}{y}{t_2'} \to_{abs3} \lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'} =_{\alpha} t_2$, where $x \neq y$ and $z$ is a fresh variable. In this case, the proof is as follows:
+%\begin{mathpar}{\scriptsize
+ \inferrule*[right={(t)}]{\inferrule*[left={$(\nabla)$}]{t_1 =_{\alpha} \esub{(\lambda_x.t_1')}{y}{t_2'}}{P\ t_1 =_{\alpha} P\ (\esub{(\lambda_x.t_1')}{y}{t_2'})} \!\!\!\!\and\!\!\!\! \inferrule*[right={(t)}]{(\star) \and \inferrule*[right={$(\nabla)$}]{\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'} =_{\alpha} t_2}{P\ (\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'}) =_{\alpha} P\ t_2} }{P\ (\esub{(\lambda_x.t_1')}{y}{t_2'}) =_{\alpha} P\ t_2}}{P\ t_1 =_{\alpha} P\ t_2}}
+\end{mathpar}%
+%\noindent% where (T) denotes a transitivity step, $(\nabla)$ corresponds to an application of lemma [aeq_P], and  $(\star)$ is given by
+%\begin{mathpar}{\small
+ \inferrule*[right={(def. $P$)}]{\inferrule*[right={$(\circ)$}]{\inferrule{~}{\metasub{\lambda_x.(P\ t_1')}{y}{P\ t_2'} =_{\alpha}  \lambda_z.\metasub{(\swap{x}{z}{P\ t_1'})}{y}{P\ t_2'}}}{\metasub{\lambda_x.(P\ t_1')}{y}{P\ t_2'} =_{\alpha}  \lambda_z.\metasub{P\ (\swap{x}{z}{t_1'})}{y}{P\ t_2'}}} {P\ (\esub{(\lambda_x.t_1')}{y}{t_2'}) =_{\alpha} P\ (\lambda_z.\esub{(\swap{x}{z}{t_1'})}{y}{t_2'})}} 
+\end{mathpar}%
+ %\noindent% where $(\circ)$ corresponds to an application of lemma [aeq_swap_P]. %\hfill% $\Box$ %\end{proofbox}% *)
 
 (** The red arrow in %(\ref{lx:zprop-proof})% is proved by Lemma [pure_refltrans_B] below, which is proved by induction on the size of the term [t]: *)
 
 Lemma pure_refltrans_B: forall t, pure t ->  t ↠lx (B t).
 Proof.
   induction t as [x | t1 x IH | t1 t2 IH1 IH2 | t1 t2 x IH2 IH1 ] using n_sexp_size_induction.
-    - intro Hpure. simpl. apply refltrans_refl.
-    - intro Hpure. simpl. apply refltrans_n_abs_lx. apply IH.
+    - (* var *) intro Hpure. simpl. apply refltrans_refl.
+    - (* abs *) intro Hpure. simpl. apply refltrans_n_abs_lx. apply IH.
       + simpl. lia.
       + inversion Hpure; subst. assumption.
-    - intro Hpure. inversion Hpure; subst. destruct t1 eqn:Ht1.
+    - (* app *) intro Hpure. inversion Hpure; subst. destruct t1 eqn:Ht1.
       + simpl. apply refltrans_n_app_right_lx. apply IH1.
         * simpl. lia.
         * assumption.
-      + apply refltrans_composition with (n_app (B (n_abs x n)) t2).
+      + simpl. apply refltrans_composition with (n_app (B (n_abs x n)) t2).
         * apply refltrans_n_app_left_lx. apply IH1.
           ** simpl. lia.
           ** assumption.
-        * simpl. apply refltrans_composition with  ([x := t2](B n)).
-          ** apply refltrans_lx_b. apply rtrans with ([x := t2] B n); try apply refltrans_refl. apply step_redex. apply betax_aeq_step with (n_app (n_abs x (B n)) t2) ([x := t2] B n).
-             *** apply aeq_refl.
-            *** apply step_betax.
-            *** apply aeq_refl.
-          ** apply refltrans_composition with ([x := B t2] B n).
-             *** apply refltrans_n_sub_in_lx. apply IH1.
-                **** simpl. lia.
-                **** assumption.
+        * apply refltrans_composition with (n_app (B (n_abs x n)) (B t2)).
+          ** apply refltrans_n_app_right_lx. apply IH1.
+             *** simpl. lia.
+             *** assumption.
+          ** apply refltrans_composition with ([x := B t2](B n)).
+             *** apply refltrans_lx_b. apply rtrans with ([x := B t2] B n); try apply refltrans_refl. apply step_redex. apply betax_aeq_step with (n_app (n_abs x (B n)) (B t2)) ([x := B t2] B n).
+                **** apply aeq_refl.
+                **** apply step_betax.
+                **** apply aeq_refl.
              *** apply refltrans_lx_x. apply pure_scx. apply pure_B. inversion H1; subst. assumption.
       + change (B (n_app (n_app n1 n2) t2)) with (n_app (B (n_app n1 n2)) (B t2)). apply refltrans_n_app_lx.
         * apply IH1.
@@ -740,8 +739,10 @@ Proof.
           ** simpl. lia.
           ** assumption.
       + inversion H1.
-    (** %\noindent {\bf Proof.}% The interesting case is when $t$ is an application, i.e., $t = t_1\ t_2$, and we have to show that $t_1\ t_2 \tto_{lx} B(t_1\ t_2)$. If $t_1$ is not an abstraction, then $B(t_1\ t_2) = B(t_1)\ B(t_2)$ and the proof is by induction hypothesis. If $t_1$ is an abstraction, say $t_1 = \lambda_x.t_1'$, then we have to show that $(\lambda_x.t_1')\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}$, since $B((\lambda_x.t_1')\ t_2) = \metasub{(B\ t_1')}{x}{(B\ t_2)}$:
-%\begin{mathpar} \inferrule{\inferrule{\inferrule{\inferrule*[Right={(i.h.)}]{~}{\lambda_x.t_1' \tto_{lx} \lambda_x.B(t_1')}}{\lambda_x.t_1' \tto_{lx} B(\lambda_x.t_1')}}{(\lambda_x.t_1')\ t_2 \tto_{lx} (B(\lambda_x.t_1'))\ t_2} \and \inferrule{(\star)}{(B(\lambda_x.t_1'))\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}{(\lambda_x.t_1')\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}
+    - intro Hpure. inversion Hpure.
+Qed.
+(** %\begin{proofbox}% The interesting case is when $t$ is an application, i.e., $t = t_1\ t_2$, and we have to show that $t_1\ t_2 \tto_{lx} B(t_1\ t_2)$. If $t_1$ is not an abstraction, then $B(t_1\ t_2) = B(t_1)\ B(t_2)$ and the proof is by induction hypothesis. If $t_1$ is an abstraction, say $t_1 = \lambda_x.t_1'$, then we have to show that %\[(\lambda_x.t_1')\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}\]% since $B((\lambda_x.t_1')\ t_2) = \metasub{(B\ t_1')}{x}{(B\ t_2)}$:
+%\begin{mathpar} \inferrule*[right={(t)}]{\inferrule{\inferrule{\inferrule*[Right={(i.h.)}]{~}{\lambda_x.t_1' \tto_{lx} \lambda_x.B(t_1')}}{\lambda_x.t_1' \tto_{lx} B(\lambda_x.t_1')}}{(\lambda_x.t_1')\ t_2 \tto_{lx} (B(\lambda_x.t_1'))\ t_2} \and \inferrule{(\star)}{(B(\lambda_x.t_1'))\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}{(\lambda_x.t_1')\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}
 \end{mathpar}%
 %\noindent% where $(\star)$ is proved as follows:
 %\begin{mathpar}
@@ -752,11 +753,9 @@ Proof.
 \inferrule{\inferrule{\inferrule*[Right={(i.h.)}]{~}{t_2 \tto_{lx} B\ t_2}}{\esub{(B\ t_1')}{x}{t_2} \tto_{lx} \esub{(B\ t_1')}{x}{(B\ t_2)}} \and (\star\star\star) }{\esub{(B\ t_1')}{x}{t_2} \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}
 \end{mathpar}
 \noindent% where the ($\star\star\star$) corresponds to the reduction %\begin{center}$\esub{(B\ t_1')}{x}{(B\ t_2)} \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}$\end{center}% that is justified by Lemma [pure_scx] since $(B\ t_1')$ is pure by Lemma [pure_B].
-$\hfill\Box$     *)   
-    - intro Hpure. inversion Hpure.
-Qed.
+$\hfill\Box$ %\end{proofbox}% 
 
-(** In order to complete the proof of the left diagram in %(\ref{lx:zprop-proof})%, we need to show that $B(P\ t_1) \tto_{lx} B(P\ t_2)$ (orange arrow). From Lemma [scx_P], we have that $P\ t_1 =_{\alpha} P\ t_2$, and we conclude because [B] is stable under $\alpha$-equivalence, as shown by Lemma [aeq_B] below: *)
+In order to complete the proof of the left diagram in %(\ref{lx:zprop-proof})%, we need to show that $B(P\ t_1) \tto_{lx} B(P\ t_2)$ (orange arrow). From Lemma [scx_P], we have that $P\ t_1 =_{\alpha} P\ t_2$, and we conclude because [B] is stable under $\alpha$-equivalence, as shown by Lemma [aeq_B] below: *)
 
 Lemma aeq_B: forall t1 t2, t1 =α t2 -> (B t1) =α (B t2).
 Proof.
@@ -823,7 +822,7 @@ Proof.
         ** reflexivity.
 Qed.
 
-(** We now proceed to the proof of the second diagram in (%\ref{lx:zprop-proof}%). We have that $t_1 \to_{b} t_2$ and we want to prove that $t_2 \tto_{lx} B(P\ t_1)$ and $B(P\ t_1) \tto_{lx} B(P\ t_1)$. The first part, proved by Lemma [step_b_refltrans_lx_B_P] below, is proved by induction on the reduction $t_1 \to_{b} t_2$ and the tricky step is to prove that $\metasub{t_1}{x}{t_2} \tto_{lx} B(\metasub{t_1}{x}{t_2})$, whose solution is to use the fact that $\to_{lx}$-steps simulate $\to_{\beta}$-steps, that are now defined as in %(\ref{lambda:beta})%, but over [n_sexp] terms. Let us see how it works.
+(** We now proceed to the proof of the second diagram in (%\ref{lx:zprop-proof}%). We have that $t_1 \to_{b} t_2$ and we want to prove that $t_2 \tto_{lx} B(P\ t_1)$ and $B(P\ t_1) \tto_{lx} B(P\ t_2)$. The first part, proved by Lemma [step_b_refltrans_lx_B_P] below, is proved by induction on the reduction $t_1 \to_{b} t_2$ and the tricky step is to prove that $\metasub{t_1}{x}{t_2} \tto_{lx} B(\metasub{t_1}{x}{t_2})$, whose solution is to use the fact that $\to_{lx}$-steps simulate $\to_{\beta}$-steps, that are now defined as in %(\ref{lambda:beta})%, but over [n_sexp] terms. Let us see how it works.
  *)
 
 (* begin hide *)
@@ -1154,7 +1153,7 @@ Proof.
         ** assumption.
     + intros t x' t' IH Hpure. inversion Hpure; subst. inversion H1.
       (**
-%\noindent {\bf Proof}.% The proof is by induction on the size of the term $t_1$. The interesting case is the application case. If $t_1 = t_{11}\ t_{12}$ then we need to prove that %\begin{center}$\metasub{(B (t_{11}\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{(t_{11}\ t_{12})}{x}{t_2})$\end{center}% We proceed by case analysis on the structure of $t_{11}$. If $t_{11}$ is the variable $x$ then our goal is $(B\ t_2)\ (\metasub{(B t_{12})}{x}{B\ t_2} \tto_{\beta} B\ (t_2\ (\metasub{t_{12}}{x}{t_2}))$ and in turn, we proceed by case analysis on the structure of $t_2$. The non-trivial case, again is when $t_2 = \lambda_y.t_2'$:
+%\begin{proofbox}% The proof is by induction on the size of the term $t_1$. The interesting case is the application case. If $t_1 = t_{11}\ t_{12}$ then we need to prove that %\begin{center}$\metasub{(B (t_{11}\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{(t_{11}\ t_{12})}{x}{t_2})$\end{center}% We proceed by case analysis on the structure of $t_{11}$. If $t_{11}$ is the variable $x$ then our goal is $(B\ t_2)\ (\metasub{(B t_{12})}{x}{B\ t_2} \tto_{\beta} B\ (t_2\ (\metasub{t_{12}}{x}{t_2}))$ and in turn, we proceed by case analysis on the structure of $t_2$. The non-trivial case, again is when $t_2 = \lambda_y.t_2'$:
 %{\scriptsize\begin{mathpar}
 \inferrule{\inferrule{\inferrule*[Right={(\sf i.h.)}]{~} {\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')} \tto_{\beta} B( \metasub{t_{12}}{x}{\lambda_y.t_2'})}} {\inferrule{\metasub{(B\ t_2')}{y}{(\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')})} \tto_{\beta}  \metasub{(B\ t_2')}{y}{(B(\metasub{t_{12}}{x}{(\lambda_y.t_2')}))}} {(\lambda_y.B\ t_2')\ (\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')}) \tto_{\beta}  \metasub{(B\ t_2')}{y}{(B(\metasub{t_{12}}{x}{(\lambda_y.t_2')}))}}}} {(B\ (\lambda_y.t_2'))\ (\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')} \tto_{\beta} B\ ((\lambda_y.t_2')\ (\metasub{t_{12}}{x}{(\lambda_y.t_2')})))}
 \end{mathpar}}%
@@ -1189,7 +1188,7 @@ Then we have two cases, either $x = y$ or $x \neq y$:
 %{\tiny \begin{mathpar}
 \inferrule{\inferrule{~}{\metasub{(\swap{z}{y}{(B\ t_{11}')})}{x}{B\ t_2} \tto_{\beta} B(\metasub{\swap{z}{y}{t_{11}'}}{x}{t_2})} \and \inferrule{~}{\metasub{(B\ t_{12})}{x}{B\ t_2} \tto_{\beta} B(\metasub{t_{12}}{x}{t_2})}} {\metasub{(\metasub{(\swap{z}{y}{(B\ t_{11}')})}{x}{B\ t_2})}{z}{\metasub{(B\ t_{12})}{x}{B\ t_2}} \tto_{\beta} \metasub{(B(\metasub{\swap{z}{y}{t_{11}'}}{x}{t_2}))}{z}{B(\metasub{t_{12}}{x}{t_2})}}\end{mathpar}}%
 $\hfill\Box$
-*)  
+%\end{proofbox}% *)
   - intros t x Hpure. inversion Hpure.
 Qed.
 
@@ -1437,7 +1436,7 @@ Proof.
       * apply pure_refltrans_beta_lx.
         ** apply pure_m_subst; apply pure_B; apply pure_P.
         ** apply pure_m_subst_refltrans_beta_B; apply pure_P.
-(** %\noindent {\bf Proof.}% Suppose that
+(** %\begin{proofbox}% Suppose that
 %\begin{center}$t_1 = \esub{t_{11}}{x}{t_{12}} \to_{b} \esub{t_{11}'}{x}{t_{12}} = t_2$, with $t_{11} \to_{b} t_{11}'$\end{center}% or
 %\begin{center}$t_1 = \esub{t_{11}}{x}{t_{12}} \to_{b} \esub{t_{11}}{x}{t_{12}'} = t_2$, with $t_{12} \to_{b} t_{12}'$.\end{center}%
 
@@ -1458,7 +1457,7 @@ Both cases have similar proofs, therefore we consider only the first reduction t
 
 %\begin{equation}\label{red:lx}\metasub{(B((P\ t_{11})))}{x}{B(P\ t_{12})}  \tto_{lx}  B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})\end{equation}%
 
-%\noindent% which is the tricky part of the proof. It is proved using the fact that $\to_{lx}$ steps can simulate $\beta$-steps as proved by Lemma [pure_beta_lx]. $\hfill\Box$ *)
+%\noindent% which is the tricky part of the proof. It is proved using the fact that $\to_{lx}$ steps can simulate $\beta$-steps as proved by Lemma [pure_beta_lx]. $\hfill\Box$ %\end{proofbox}% *)
 Qed.  
 
 (** Finally, the last part of the second diagram in %(\ref{lx:zprop-proof})% is proved by the next lemma: *)
@@ -1502,18 +1501,10 @@ Proof.
 Qed.
 (** Therefore, we can conclude that the reduction $\to_{lx}$ satisfies the compositional Z-property modulo $\alpha$-equivalence. In %\cite{fmm2021}%, we formalized that the compositional Z property implies the Z property, which in turn implies confluence. These intermediate results are used in the next theorem to conclude that $\to_{lx}$ is confluent. *)
 Theorem lambda_x_is_confluent: Confl lambdax.
+(* begin show *)
 Proof.
   apply Z_prop_aeq_implies_Confl.
   apply Z_comp_aeq_implies_Z_prop_aeq.
   apply lambda_x_Z_comp_aeq.
 Qed.
-(**
-<<
-Proof.
-  apply Z_prop_aeq_implies_Confl.
-  apply Z_comp_aeq_implies_Z_prop_aeq.
-  apply lambda_x_Z_comp_aeq.
-Qed.
->>
- *)
-
+(* end show *)
