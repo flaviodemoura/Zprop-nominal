@@ -728,12 +728,13 @@ Proof.
           ** apply refltrans_n_app_right_lx. apply IH1.
              *** simpl. lia.
              *** assumption.
-          ** apply refltrans_composition with ([x := B t2](B n)).
+          ** (* begin translation *) apply refltrans_composition with ([x := B t2](B n)).
              *** apply refltrans_lx_b. apply rtrans with ([x := B t2] B n); try apply refltrans_refl. apply step_redex. apply betax_aeq_step with (n_app (n_abs x (B n)) (B t2)) ([x := B t2] B n).
                 **** apply aeq_refl.
                 **** apply step_betax.
                 **** apply aeq_refl.
              *** apply refltrans_lx_x. apply pure_scx. apply pure_B. inversion H1; subst. assumption.
+                 (* end translation *)
       + change (B (n_app (n_app n1 n2) t2)) with (n_app (B (n_app n1 n2)) (B t2)). apply refltrans_n_app_lx.
         * apply IH1.
           ** simpl. lia.
@@ -744,19 +745,24 @@ Proof.
       + inversion H1.
     - intro Hpure. inversion Hpure.
 Qed.
-(** %\begin{proofbox}% The interesting case is when $t$ is an application, i.e., $t = t_1\ t_2$, and we have to show that $t_1\ t_2 \tto_{lx} B(t_1\ t_2)$. If $t_1$ is not an abstraction, then $B(t_1\ t_2) = B(t_1)\ B(t_2)$ and the proof is by induction hypothesis. If $t_1$ is an abstraction, say $t_1 = \lambda_x.t_1'$, then we have to show that %\[(\lambda_x.t_1')\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}\]% since $B((\lambda_x.t_1')\ t_2) = \metasub{(B\ t_1')}{x}{(B\ t_2)}$:
-%\begin{mathpar} \inferrule*[right={(t)}]{\inferrule{\inferrule{\inferrule*[Right={(i.h.)}]{~}{\lambda_x.t_1' \tto_{lx} \lambda_x.B(t_1')}}{\lambda_x.t_1' \tto_{lx} B(\lambda_x.t_1')}}{(\lambda_x.t_1')\ t_2 \tto_{lx} (B(\lambda_x.t_1'))\ t_2} \and \inferrule{(\star)}{(B(\lambda_x.t_1'))\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}{(\lambda_x.t_1')\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}
-\end{mathpar}%
-%\noindent% where $(\star)$ is proved as follows:
-%\begin{mathpar}
- \inferrule{ \inferrule{(\lambda_x.B(t_1'))\ t_2 \tto_{b} \esub{(B\ t_1')}{x}{t_2} \and \inferrule{(\star\star)}{\esub{(B\ t_1')}{x}{t_2} \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)} }}{(\lambda_x.B(t_1'))\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}{(B(\lambda_x.t_1'))\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}
+(** %\begin{proofbox}% The proof is by induction on the size of the term [t]. The interesting case is when [t] is an application, i.e., [t] = $t_1\ t_2$, and we have to show that $t_1\ t_2 \tto_{lx} B(t_1\ t_2)$. If $t_1$ is not an abstraction, then $B(t_1\ t_2) = B(t_1)\ B(t_2)$ and we are done by the induction hypothesis. If $t_1$ is an abstraction, say $t_1 = \lambda_x.t_1'$, then we have to show that %\[(\lambda_x.t_1')\ t_2 \tto_{lx} B((\lambda_x.t_1')\ t_2) = \metasub{(B\ t_1')}{x}{(B\ t_2)}\]%
+whose derivation is as follows:
+%\begin{mathpar}{\scriptsize \inferrule*[right={(t)}]{\inferrule*[right={($\nabla$)}]{\inferrule*[right={(def. $B$)}]{\inferrule*[Right={(i.h.)}]{~}{\lambda_x.t_1' \tto_{lx} \lambda_x.B(t_1')}}{\lambda_x.t_1' \tto_{lx} B(\lambda_x.t_1')}}{(\lambda_x.t_1')\ t_2 \tto_{lx} (B(\lambda_x.t_1'))\ t_2} \and \inferrule{(\star)}{(B(\lambda_x.t_1'))\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}{(\lambda_x.t_1')\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}
 \end{mathpar}
-\noindent% where $(\star\star)$ is proved as follows:
-%\begin{mathpar}
-\inferrule{\inferrule{\inferrule*[Right={(i.h.)}]{~}{t_2 \tto_{lx} B\ t_2}}{\esub{(B\ t_1')}{x}{t_2} \tto_{lx} \esub{(B\ t_1')}{x}{(B\ t_2)}} \and (\star\star\star) }{\esub{(B\ t_1')}{x}{t_2} \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}
+\noindent% where ($\nabla$) is an application of Lemma (%\rocqsrc*{lx_nom.refltrans_n_app_left_lx}{\coqdoclemma{refltrans\_n\_app\_left\_lx}}%) and $(\star)$ is proved as follows:
+%\begin{mathpar}{\scriptsize
+\inferrule*[right={(T)}]{
+(\star\star) \and \inferrule{(\dagger)}{(B(\lambda_x.t_1'))\ (B\ t_2) \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}
+{(B(\lambda_x.t_1'))\ t_2 \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}}}
 \end{mathpar}
-\noindent% where the ($\star\star\star$) corresponds to the reduction %\begin{center}$\esub{(B\ t_1')}{x}{(B\ t_2)} \tto_{lx} \metasub{(B\ t_1')}{x}{(B\ t_2)}$\end{center}% that is justified by Lemma [pure_scx] since $(B\ t_1')$ is pure by Lemma [pure_B].
-$\hfill\Box$ %\end{proofbox}% 
+\noindent% where (T) is a transitivity step and ($\star\star$) is given by:
+
+%\begin{mathpar}{\scriptsize
+\inferrule*[left={($\diamond$)}]{\inferrule*[right={(i.h.)}]{~}{t_2 \tto_{lx} (B\ t_2)}}{(B(\lambda_x.t_1'))\ t_2 \tto_{lx} (B(\lambda_x.t_1'))\ (B\ t_2)}}
+\end{mathpar}
+\noindent% where ($\diamond$) is an application of Lemma (%\rocqsrc*{lx_nom.refltrans_n_app_right_lx}{\coqdoclemma{refltrans\_n\_app\_right\_lx}}%). Finally, ($\dagger$) is given by the reduction:
+%\[(B(\lambda_x.t_1'))\ (B\ t_2) \to_{b} \esub{(B\ t_1')}{x}{B\ t_2} \stackrel{(\star\star\star)}{\tto_{lx}} \metasub{(B\ t_1')}{x}{(B\ t_2)}\]
+\noindent% where ($\star\star\star$) follows from Lemma [pure_scx], since $B\ t_1'$ is pure by Lemma [pure_B]. $\hfill\Box$ %\end{proofbox}% 
 
 In order to complete the proof of the left diagram in %(\ref{lx:zprop-proof})%, we need to show that $B(P\ t_1) \tto_{lx} B(P\ t_2)$ (orange arrow). From Lemma [scx_P], we have that $P\ t_1 =_{\alpha} P\ t_2$, and we conclude because [B] is stable under $\alpha$-equivalence, as shown by Lemma [aeq_B] below: *)
 
