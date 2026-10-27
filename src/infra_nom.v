@@ -77,7 +77,7 @@ Proof.
 Qed.
 (* end hide *)
 
-(** * Introduction *)
+(** * Introduction %\label{sec:intro}% *)
 
 (** We present a framework for studying properties of extensions of the $\lambda$-calculus %\cite{barendregtLambdaCalculusIts1984a}%, which is based on a nominal approach %\cite{gabbayNewApproachAbstract2002}%. In the nominal setting, variables are represented by atoms, structureless entities with a decidable equality. Therefore different names mean different atoms and different variables. The nominal approach is close to the usual paper and pencil notation used in $\lambda$-calculus, whose grammar of terms is given by:
 
@@ -122,11 +122,22 @@ In the previous example, the variable capture can be avoided by applying a swap 
 \end{equation}
 \noindent% where $fv(t)$ denotes the set of free variables of $t$. The last case of the definition of metasubstitution is the one that avoids variable capture by applying a swap to the body of the abstraction before performing the metasubstitution. In this case, $z$ is a fresh variable that does not occur free in $t$ or in $u$, and it can be chosen arbitrarily. In our formalization, we will use a function called [atom_fresh] to choose such a fresh variable.
 
-%\flavio{The main contributions of this work are as follows}%:
-- formalization of the compositional Z property in the nominal setting;
-- formalization of the confluence property of the $\lambda_x$-calculus with explicit substitutions via the compositional Z property.
+A reduction relation $R$ is confluent (%\rocqsrc*{ZtoConfl_nom.Confl}{\coqdocdefinition{Confl}}%) if any two reductions starting from the same term can be joined, that is, if $t \tto_R t_1$ and $t \tto_R t_2$, then there exists a term $t_3$ such that $t_1 \tto_R t_3$ and $t_2 \tto_R t_3$, as in the following diagram, where $\tto_R$ is the reflexive-transitive closure of $R$ and the dotted arrows are existentially quantified:
 
-To the best of our knowledge this is the first formalization of the compositional Z property. %\flavio{The rest of the paper is organized as follows:}% In Section 2, we present the (compositional) Z Property. In Section 3, we present the $\lambda_x$-calculus and the confluence proof via the compositional Z property. In Section 4, we conclude and discuss future work. *)
+  $\centerline{\xymatrix{ & t \ar@{->>}[dl]_R \ar@{->>}[dr]^R & \\ t_1 \ar@{.>>}[dr]_R & & t_2 \ar@{.>>}[dl]^R \\ & t_3 & }}$
+
+The Z property %\cite{oostromDraftYourMind2007,dehornoy2008z}% is a sufficient condition for confluence. In a nutshell, a function $f$ has the Z property for a binary relation $R$ if the following diagram holds:
+
+  $\centerline{\xymatrix{ t_1 \ar[r]_R & t_2 \ar@{.>>}[dl]^R\\ f t_1 \ar@{.>>}[r]_R & f t_2}}$
+
+The compositional Z property %\cite{nakazawaCompositionalConfluenceProofs2016}% (%\rocqsrc*{ZtoConfl_nom.Z_comp_aeq}{\coqdocdefinition{Z\_comp\_aeq}}% in our formalization, modulo $\alpha$-equivalence) splits this task for a relation $R = R_1 \cup R_2$ and a function $f = f_2 \circ f_1$: it suffices to show that $f_1$ has the Z property for $R_1$, that $a \tto_R f_2(a)$ for every $a$ in the image of $f_1$, and that $f$ has a weaker version of the Z property for $R_2$, namely that $t_1 \to_{R_2} t_2$ implies $t_2 \tto_R f(t_1) \tto_R f(t_2)$. Then $f$ has the Z property for $R$, and hence $R$ is confluent.
+
+The main contributions of this work are as follows:
+- a formalization of the (compositional) Z property modulo $\alpha$-equivalence for nominal terms. The generic formalization in %\cite{fmm2021}% states the Z property and the compositional Z property for an arbitrary relation over an abstract set, and proves that they imply confluence. We instantiate this set with nominal terms with explicit substitutions, and adapt the definitions so that the functions involved are compatible with $\alpha$-equivalence.
+- a toolkit of properties of the metasubstitution on nominal terms, built around the Substitution Lemma for calculi with explicit substitutions formalized in %\cite{limaFormalizedExtensionSubstitution2023}% (%\rocqsrc*{msubst.m_subst_lemma}{\coqdoclemma{m\_subst\_lemma}}%). The Substitution Lemma is the key ingredient to show that the complete development function $B$ commutes with the metasubstitution up to $\beta$-reduction (Lemma %\rocqsrc*{lx_nom.pure_m_subst_refltrans_beta_B}{\coqdoclemma{pure\_m\_subst\_refltrans\_beta\_B}}%), which is the tricky step of the confluence proof.
+- a formalization of the confluence of the $\lambda_x$-calculus that combines the two previous contributions. The reduction $\to_{lx}$ is split into the $b$-reduction, which creates explicit substitutions, and the $x$-reduction, which propagates and eliminates them. The function $P$, which eliminates all explicit substitutions, and the function $B$ are shown to satisfy the compositional Z property modulo $\alpha$-equivalence (%\rocqsrc*{lx_nom.lambda_x_Z_comp_aeq}{\coqdoclemma{lambda\_x\_Z\_comp\_aeq}}%), where the Substitution Lemma is used to simulate $b$-steps by $\beta$-steps. The theorems of the first contribution then give the confluence of $\to_{lx}$ (%\rocqsrc*{lx_nom.lambda_x_is_confluent}{\coqdoclemma{lambda\_x\_is\_confluent}}%).
+
+To the best of our knowledge, this is the first nominal formalization of the confluence of the $\lambda_x$-calculus via the compositional Z property. The rest of the paper is organized as follows. In Subsection 1.1, we extend the syntax with an explicit substitution operator, and define $\alpha$-equivalence and the metasubstitution on the resulting terms, together with their main properties. In Section 2, we present the $\lambda_x$-calculus and prove its confluence via the compositional Z property. In Section 3, we discuss related work, conclude, and outline future work. *)
 (* begin hide *)
 Definition vswap (x:atom) (y:atom) (z:atom) := if (z == x) then y else if (z == y) then x else z.
 

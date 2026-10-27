@@ -292,11 +292,7 @@ Proof.
 Qed.
 (* end hide *)
 (**
-The proof strategy is similar to  %\cite{nakazawaCompositionalConfluenceProofs2016}%, where the authors prove that the $\lambda_x$-calculus satisfies the compositional Z property, which is an extension of the Z property %\cite{oostromDraftYourMind2007,dehornoy2008z}%, a promising technique used to prove confluence of reduction systems %\cite{vanoostrom:LIPIcs.FSCD.2021.24,felgenhauerProperty2016}%. In a nutshell, a function [f] has the Z property for a binary relation [R] if the following diagram holds:
-
-  $\centerline{\xymatrix{ t_1 \ar[r]_R & t_2 \ar@{.>>}[dl]^R\\ f t_1 \ar@{.>>}[r]_R & f t_2}}$
-
-For the $\lambda_x$-calculus, we take $R$ as the reduction relation $\to_{lx}$, and [f] as the composition of two functions, the complete permutation [P] and the complete development [B], recursively defined as:
+The proof strategy is similar to  %\cite{nakazawaCompositionalConfluenceProofs2016}%, where the authors prove that the $\lambda_x$-calculus satisfies the compositional Z property, which is an extension of the Z property %\cite{oostromDraftYourMind2007,dehornoy2008z}%, a promising technique used to prove confluence of reduction systems %\cite{vanoostrom:LIPIcs.FSCD.2021.24,felgenhauerProperty2016}%. For the $\lambda_x$-calculus, we take $R$ in the Z property (Section %\ref{sec:intro}%) as the reduction relation $\to_{lx}$, and [f] as the composition of two functions, the complete permutation [P] and the complete development [B], recursively defined as:
 *)
 
 (** %\noindent\begin{minipage}[t]{0.485\textwidth}\tcbset{coqdoc local/.style={unbreakable,left=5pt,right=4pt,equal height group=PB,fontupper=\scriptsize}}% *)
@@ -728,13 +724,12 @@ Proof.
           ** apply refltrans_n_app_right_lx. apply IH1.
              *** simpl. lia.
              *** assumption.
-          ** (* begin translation *) apply refltrans_composition with ([x := B t2](B n)).
+          ** apply refltrans_composition with ([x := B t2](B n)).
              *** apply refltrans_lx_b. apply rtrans with ([x := B t2] B n); try apply refltrans_refl. apply step_redex. apply betax_aeq_step with (n_app (n_abs x (B n)) (B t2)) ([x := B t2] B n).
                 **** apply aeq_refl.
                 **** apply step_betax.
                 **** apply aeq_refl.
              *** apply refltrans_lx_x. apply pure_scx. apply pure_B. inversion H1; subst. assumption.
-                 (* end translation *)
       + change (B (n_app (n_app n1 n2) t2)) with (n_app (B (n_app n1 n2)) (B t2)). apply refltrans_n_app_lx.
         * apply IH1.
           ** simpl. lia.
@@ -762,9 +757,9 @@ whose derivation is as follows:
 \end{mathpar}
 \noindent% where ($\diamond$) is an application of Lemma (%\rocqsrc*{lx_nom.refltrans_n_app_right_lx}{\coqdoclemma{refltrans\_n\_app\_right\_lx}}%). Finally, ($\dagger$) is given by the reduction:
 %\[(B(\lambda_x.t_1'))\ (B\ t_2) \to_{b} \esub{(B\ t_1')}{x}{B\ t_2} \stackrel{(\star\star\star)}{\tto_{lx}} \metasub{(B\ t_1')}{x}{(B\ t_2)}\]
-\noindent% where ($\star\star\star$) follows from Lemma [pure_scx], since $B\ t_1'$ is pure by Lemma [pure_B]. $\hfill\Box$ %\end{proofbox}% 
+\noindent% where ($\star\star\star$) follows from Lemma (%\rocqsrc*{lx_nom.pure_scx}{\coqdoclemma{pure\_scx}}%), since $B\ t_1'$ is pure by Lemma (%\rocqsrc*{lx_nom.pure_B}{\coqdoclemma{pure\_B}}%). $\hfill\Box$ %\end{proofbox}% 
 
-In order to complete the proof of the left diagram in %(\ref{lx:zprop-proof})%, we need to show that $B(P\ t_1) \tto_{lx} B(P\ t_2)$ (orange arrow). From Lemma [scx_P], we have that $P\ t_1 =_{\alpha} P\ t_2$, and we conclude because [B] is stable under $\alpha$-equivalence, as shown by Lemma [aeq_B] below: *)
+In order to complete the proof of the left diagram in %(\ref{lx:zprop-proof})%, we need to show that $B(P\ t_1) \tto_{lx} B(P\ t_2)$ (orange arrow). From Lemma (%\rocqsrc*{lx_nom.scx_P}{\coqdoclemma{scx\_P}}%), we have that $P\ t_1 =_{\alpha} P\ t_2$, and we conclude because [B] is stable under $\alpha$-equivalence, as shown by the following lemma: *)
 
 Lemma aeq_B: forall t1 t2, t1 =α t2 -> (B t1) =α (B t2).
 Proof.
@@ -831,7 +826,10 @@ Proof.
         ** reflexivity.
 Qed.
 
-(** We now proceed to the proof of the second diagram in (%\ref{lx:zprop-proof}%). We have that $t_1 \to_{b} t_2$ and we want to prove that $t_2 \tto_{lx} B(P\ t_1)$ and $B(P\ t_1) \tto_{lx} B(P\ t_2)$. The first part, proved by Lemma [step_b_refltrans_lx_B_P] below, is proved by induction on the reduction $t_1 \to_{b} t_2$ and the tricky step is to prove that $\metasub{t_1}{x}{t_2} \tto_{lx} B(\metasub{t_1}{x}{t_2})$, whose solution is to use the fact that $\to_{lx}$-steps simulate $\to_{\beta}$-steps, that are now defined as in %(\ref{lambda:beta})%, but over [n_sexp] terms. Let us see how it works.
+(** We now proceed to the proof of the second diagram in (%\ref{lx:zprop-proof}%). We have that $t_1 \to_{b} t_2$ and we want to prove that $t_2 \tto_{lx} B(P\ t_1) \tto_{lx} B(P\ t_2)$. The first part, proved by Lemma [step_b_refltrans_lx_B_P] below, is proved by induction on the reduction $t_1 \to_{b} t_2$ and the tricky step is to prove that %\begin{equation}\label{eq:lx:beta}
+\metasub{(B(P\ t_1))}{x}{B(P\ t_2)} \tto_{lx} B(\metasub{(P\ t_1)}{x}{P\ t_2})
+\end{equation}
+\noindent% whose solution uses the fact that $\to_{lx}$-steps simulate $\to_{\beta}$-steps, that are now defined as in %(\ref{lambda:beta})%, but over [n_sexp] terms. Let us see how it works.
  *)
 
 (* begin hide *)
@@ -847,7 +845,7 @@ Notation "t →β u" := (beta_ctx t u) (at level 60).
 Notation "t ↠β u" := (refltrans beta_ctx t u) (at level 60).
 (* end hide *)
 
-(** The simulation of one step $\beta$-reduction of pure terms is proved in the next lemma using induction on the reduction $t_1 \to_{\beta} t_2$: *)
+(** On pure terms, every $\beta$-step can be simulated by a $\tto_{lx}$-reduction. This allows us to reduce the proof of %(\ref{eq:lx:beta})% to a statement about $\beta$-reduction: *)
 
 Lemma pure_beta_lx: forall t1 t2, pure t1 -> (t1 →β t2) -> (t1 ↠lx t2).
 Proof.
@@ -867,6 +865,12 @@ Proof.
     - inversion Hpure1.
     - inversion Hpure1.
 Qed.
+
+(** Since this lemma extends to $\tto_{\beta}$ by a straightforward induction on the number of steps, it remains to show that
+%\[
+\metasub{(B(P\ t_1))}{x}{B(P\ t_2)} \tto_{\beta} B(\metasub{(P\ t_1)}{x}{P\ t_2})
+\]
+\noindent% which is the statement of the following lemma: *)
 
 (* begin hide *)
 Lemma pure_beta_trans: forall t1 t2, pure t1 -> t1 →β t2 -> pure t2.
@@ -1051,8 +1055,6 @@ Proof.
 Qed.    
 (* end hide *)
 
-(** One challenging task in this formalization was the proof of the next lemma, which states that substituting the complete developments of its components into the complete development of a term reduces (via $\beta$-reduction) to the complete development of the corresponding metasubstitution. *)
-
 Lemma pure_m_subst_refltrans_beta_B: forall t1 t2 x, pure t1 -> pure t2 ->
                        ({x := B t2} B t1) ↠β (B ({x := t2} t1)).
 Proof.
@@ -1161,45 +1163,28 @@ Proof.
         ** inversion Hpure; subst. assumption.
         ** assumption.
     + intros t x' t' IH Hpure. inversion Hpure; subst. inversion H1.
-      (**
-%\begin{proofbox}% The proof is by induction on the size of the term $t_1$. The interesting case is the application case. If $t_1 = t_{11}\ t_{12}$ then we need to prove that %\begin{center}$\metasub{(B (t_{11}\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{(t_{11}\ t_{12})}{x}{t_2})$\end{center}% We proceed by case analysis on the structure of $t_{11}$. If $t_{11}$ is the variable $x$ then our goal is $(B\ t_2)\ (\metasub{(B t_{12})}{x}{B\ t_2} \tto_{\beta} B\ (t_2\ (\metasub{t_{12}}{x}{t_2}))$ and in turn, we proceed by case analysis on the structure of $t_2$. The non-trivial case, again is when $t_2 = \lambda_y.t_2'$:
-%{\scriptsize\begin{mathpar}
-\inferrule{\inferrule{\inferrule*[Right={(\sf i.h.)}]{~} {\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')} \tto_{\beta} B( \metasub{t_{12}}{x}{\lambda_y.t_2'})}} {\inferrule{\metasub{(B\ t_2')}{y}{(\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')})} \tto_{\beta}  \metasub{(B\ t_2')}{y}{(B(\metasub{t_{12}}{x}{(\lambda_y.t_2')}))}} {(\lambda_y.B\ t_2')\ (\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')}) \tto_{\beta}  \metasub{(B\ t_2')}{y}{(B(\metasub{t_{12}}{x}{(\lambda_y.t_2')}))}}}} {(B\ (\lambda_y.t_2'))\ (\metasub{(B t_{12})}{x}{B\ (\lambda_y.t_2')} \tto_{\beta} B\ ((\lambda_y.t_2')\ (\metasub{t_{12}}{x}{(\lambda_y.t_2')})))}
-\end{mathpar}}%
-
-Another non-trivial case occurs when $t_{11} = \lambda_y.t_{11}'$, leading to the goal  %\begin{center}$\metasub{(B ((\lambda_y.t_{11}')\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})$\end{center}%
-
-%\noindent% whose derivation is given by
-
-%\begin{mathpar}
-\inferrule{\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})}{\metasub{(B ((\lambda_y.t_{11}')\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})}
-\end{mathpar}%
-
-Then we have two cases, either $x = y$ or $x \neq y$:
-
-%\begin{enumerate}
-\item $x = y$:
-{\small \begin{mathpar}
-\inferrule{\inferrule{ \inferrule{ \inferrule{ \inferrule*[Right={(\sf i.h.)}]{~}{\metasub{(B\ t_{12})}{x}{B\ t_2} \tto_{\beta} B \metasub{t_{12}}{x}{t_2}}} {\metasub{(B\ t_{11}')}{y}{(\metasub{(B\ t_{12})}{x}{B\ t_2})} \tto_{\beta} \metasub{(B\ t_{11}')}{y}{B (\metasub{t_{12}}{x}{t_2})}}} {\metasub{(B\ t_{11}')}{y}{(\metasub{(B\ t_{12})}{x}{B\ t_2})} \tto_{\beta} B ((\lambda_y.t_{11}')\ \metasub{t_{12}}{x}{t_2})}} {\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})}} {\metasub{(B ((\lambda_y.t_{11}')\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})}
-\end{mathpar}}
-
-\item $x \neq y$:
-{\scriptsize\begin{mathpar}
-\inferrule{\inferrule{\inferrule{ \inferrule{(\star)} {\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2} \tto_{\beta} \metasub{(B(\metasub{\swap{z}{y}{t_{11}'}}{x}{t_2}))}{z}{B(\metasub{t_{12}}{x}{t_2})}}}{\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2} \tto_{\beta} B ((\lambda_z.(\metasub{\swap{z}{y}{t_{11}'}}{x}{t_2}))\ (\metasub{t_{12}}{x}{t_2}))}} {\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})}} {\metasub{(B ((\lambda_y.t_{11}')\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})}
-\end{mathpar}}
-\end{enumerate}%
-
-%\noindent% where $(\star)$ is obtained by decomposing the reduction
-
-%\noindent {\small $\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2} \tto_{\beta} \metasub{(B(\metasub{\swap{z}{y}{t_{11}'}}{x}{t_2}))}{z}{B(\metasub{t_{12}}{x}{t_2})}$}%
-
-%\noindent% using %{\small $\metasub{(\metasub{(\swap{z}{y}{(B\ t_{11}')})}{x}{B\ t_2})}{z}{\metasub{(B\ t_{12})}{x}{B\ t_2}}$}% as the intermediate term, and each subreduction is solved as follows: the first subreduction is an instance of the Substitution Lemma ([m_subst_lemma]) formalized in %\cite{limaFormalizedExtensionSubstitution2023}%, and the second subreduction is obtained by applying the induction hypothesis to the two components of the application:
-%{\tiny \begin{mathpar}
-\inferrule{\inferrule{~}{\metasub{(\swap{z}{y}{(B\ t_{11}')})}{x}{B\ t_2} \tto_{\beta} B(\metasub{\swap{z}{y}{t_{11}'}}{x}{t_2})} \and \inferrule{~}{\metasub{(B\ t_{12})}{x}{B\ t_2} \tto_{\beta} B(\metasub{t_{12}}{x}{t_2})}} {\metasub{(\metasub{(\swap{z}{y}{(B\ t_{11}')})}{x}{B\ t_2})}{z}{\metasub{(B\ t_{12})}{x}{B\ t_2}} \tto_{\beta} \metasub{(B(\metasub{\swap{z}{y}{t_{11}'}}{x}{t_2}))}{z}{B(\metasub{t_{12}}{x}{t_2})}}\end{mathpar}}%
-$\hfill\Box$
-%\end{proofbox}% *)
   - intros t x Hpure. inversion Hpure.
 Qed.
+(**
+%\begin{proofbox}% The proof is by induction on the size of [t1]. The first interesting case is when [t1] is an application $t_{11}\ t_{12}$, where we need to prove that %\begin{center}$\metasub{(B (t_{11}\ t_{12}))}{x}{B\ t_2} \tto_{\beta} B (\metasub{(t_{11}\ t_{12})}{x}{t_2})$\end{center}% We proceed by case analysis on $t_{11}$. If $t_{11}$ is the variable $x$, then the goal becomes %\begin{center}$(B\ t_2)\ (\metasub{(B\ t_{12})}{x}{B\ t_2}) \tto_{\beta} B\ (t_2\ (\metasub{t_{12}}{x}{t_2}))$\end{center}% which is proved by the reduction
+%\[\begin{array}{rl}
+(B\ t_2)\ (\metasub{(B\ t_{12})}{x}{B\ t_2}) & \stackrel{(\sf i.h.)}{\tto_{\beta}} (B\ t_2)\ (B(\metasub{t_{12}}{x}{t_2}))\\[1ex]
+& \stackrel{(\diamond)}{\tto_{\beta}} B\ (t_2\ (\metasub{t_{12}}{x}{t_2}))
+\end{array}\]
+\noindent% where the first step applies the induction hypothesis to $t_{12}$ in the argument of the application (Lemma %\rocqsrc*{ZtoConfl_nom.refltrans_n_app_right}{\coqdoclemma{refltrans\_n\_app\_right}}%), and ($\diamond$) is Lemma %(\rocqsrc*{lx_nom.n_app_refltrans_beta_B}{\coqdoclemma{n\_app\_refltrans\_beta\_B}})%.
+
+%\par\smallskip\noindent The other non-trivial case is when $t_{11}$ is an abstraction $\lambda_y.t_{11}'$ (the remaining cases follow directly from the induction hypothesis). By definition of $B$, the goal is
+\begin{center}$\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2} \tto_{\beta} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})$\end{center}
+\noindent If $x = y$, the result follows from Lemma (\rocqsrc*{msubst.aeq_double_m_subst}{\coqdoclemma{aeq\_double\_m\_subst}}) and the induction hypothesis applied to $t_{12}$. If $x \neq y$, let $z$ be a fresh name. Then
+{\small\[\begin{array}{l}
+\metasub{(\metasub{(B\ t_{11}')}{y}{B\ t_{12}})}{x}{B\ t_2}\\[1ex]
+\quad =_{\alpha} \metasub{(\metasub{(\swap{y}{z}{(B\ t_{11}')})}{x}{B\ t_2})}{z}{\metasub{(B\ t_{12})}{x}{B\ t_2}}\\[1ex]
+\quad \stackrel{(\star)}{\tto_{\beta}} \metasub{(B(\metasub{(\swap{y}{z}{t_{11}'})}{x}{t_2}))}{z}{B(\metasub{t_{12}}{x}{t_2})}\\[1ex]
+\quad =_{\alpha} B (\metasub{((\lambda_y.t_{11}')\ t_{12})}{x}{t_2})
+\end{array}\]}
+\noindent where the first $\alpha$-equivalence step renames $y$ to $z$ and applies the Substitution Lemma (\rocqsrc*{msubst.m_subst_lemma}{\coqdoclemma{m\_subst\_lemma}}) formalized in \cite{limaFormalizedExtensionSubstitution2023}; ($\star$) applies the induction hypothesis to $t_{12}$ and to $\swap{y}{z}{t_{11}'}$, which has the same size as $t_{11}'$ (Lemma \rocqsrc*{lx_nom.pure_refltrans_beta_m_subst_compat}{\coqdoclemma{pure\_refltrans\_beta\_m\_subst\_compat}}); and the last step follows from the definition of $B$ and Lemma (\rocqsrc*{msubst.aeq_m_subst_abs_neq}{\coqdoclemma{aeq\_m\_subst\_abs\_neq}}).
+%$\hfill\Box$
+%\end{proofbox}% *)
 
 (* begin hide *)
 Lemma refltrans_beta_aeq_beta: forall t1 t2 t3, (t1 ↠β t2) -> (t2 =α t3) -> t1 ↠β t3.
@@ -1390,9 +1375,9 @@ Proof.
 Qed.
 (* end hide *)
 
-(** Now we are ready to prove the first part of the second diagram in %(\ref{lx:zprop-proof})%. As explained before, the challenging case is the one involving the explicit substitution: *)
+(** Now we are ready to prove the first part of the second diagram in %(\ref{lx:zprop-proof})%: *)
 
-Lemma step_b_refltrans_lx_B_P: forall t1 t2, t1 →b t2 -> t2 ↠lx (B(P t1)).
+Lemma step_b_refltrans_lx_B_P: forall t1 t2, (t1 →b t2) -> (t2 ↠lx (B(P t1))).
 Proof. 
   intros t1 t2 H. induction H.
   - inversion H; subst. inversion H1; subst. apply refltrans_composition with ([x := t3] t0).
@@ -1445,28 +1430,24 @@ Proof.
       * apply pure_refltrans_beta_lx.
         ** apply pure_m_subst; apply pure_B; apply pure_P.
         ** apply pure_m_subst_refltrans_beta_B; apply pure_P.
-(** %\begin{proofbox}% Suppose that
+(** %\begin{proofbox}%
+The challenging case is the one involving the explicit substitution. Suppose that
 %\begin{center}$t_1 = \esub{t_{11}}{x}{t_{12}} \to_{b} \esub{t_{11}'}{x}{t_{12}} = t_2$, with $t_{11} \to_{b} t_{11}'$\end{center}% or
 %\begin{center}$t_1 = \esub{t_{11}}{x}{t_{12}} \to_{b} \esub{t_{11}}{x}{t_{12}'} = t_2$, with $t_{12} \to_{b} t_{12}'$.\end{center}%
 
-Both cases have similar proofs, therefore we consider only the first reduction that proceeds as follows:
+Both cases have similar proofs, therefore we consider only the first one. Since $P(\esub{t_{11}}{x}{t_{12}}) = \metasub{(P\ t_{11})}{x}{P\ t_{12}}$, the proof proceeds as follows:
 
-%{\tiny \begin{mathpar}
-\inferrule{ \inferrule{ \inferrule{ \inferrule{~} {t_{11}' \tto_{lx} B (P\ t_{11})} \and \inferrule{(\star)}{t_{12} \tto_{lx} B (P\ t_{12})}} {\esub{t_{11}'}{x}{t_{12}} \tto_{lx} \esub{B (P\ t_{11})}{x}{B( P\ t_{12})}}} {\esub{t_{11}'}{x}{t_{12}} \tto_{lx} B(\esub{(P\ t_{11})}{x}{P\ t_{12}})} \and \inferrule{(\star\star)} {B(\esub{(P\ t_{11})}{x}{P\ t_{12}}) \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})}}
-{\inferrule{\esub{t_{11}'}{x}{t_{12}} \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})} {\esub{t_{11}'}{x}{t_{12}} \tto_{lx} B(P(\esub{t_{11}}{x}{t_{12}}))}}
+%{\scriptsize \begin{mathpar}
+\inferrule*[right={(T)}]{\inferrule*[right={(def. $B$)}]{\inferrule*[right={(sub)}]{\inferrule*[left={(i.h.)}]{~}{t_{11}' \tto_{lx} B (P\ t_{11})} \and \inferrule*[Right={$(\star)$}]{~}{t_{12} \tto_{lx} B (P\ t_{12})}}{\esub{t_{11}'}{x}{t_{12}} \tto_{lx} \esub{(B (P\ t_{11}))}{x}{B (P\ t_{12})}}}{\esub{t_{11}'}{x}{t_{12}} \tto_{lx} B(\esub{(P\ t_{11})}{x}{P\ t_{12}})} \and (\star\star)}{\esub{t_{11}'}{x}{t_{12}} \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})}
 \end{mathpar}}%
 
-%\noindent% where $(\star)$ is easily proved by lemmas [refltrans_P], [pure_P] and [pure_refltrans_B], and $(\star\star)$ is proved as follows:
+%\noindent% where (sub) is Lemma (%\rocqsrc*{lx_nom.refltrans_n_sub_lx}{\coqdoclemma{refltrans\_n\_sub\_lx}}%), (T) is transitivity, and $(\star)$ is the composition of $t_{12} \tto_x P\ t_{12}$ (Lemma %\rocqsrc*{lx_nom.refltrans_P}{\coqdoclemma{refltrans\_P}}%) with $P\ t_{12} \tto_{lx} B(P\ t_{12})$ (Lemma %\rocqsrc*{lx_nom.pure_refltrans_B}{\coqdoclemma{pure\_refltrans\_B}}%, since $P\ t_{12}$ is pure by Lemma %\rocqsrc*{lx_nom.pure_P}{\coqdoclemma{pure\_P}}%). The reduction $(\star\star)$, that is, $B(\esub{(P\ t_{11})}{x}{P\ t_{12}}) \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})$, is proved as follows:
 
-%\begin{mathpar}
- \inferrule{ \inferrule{ \inferrule{(\star\star\star)}{\esub{(B(P\ t_{11}))}{x}{B(P\ t_{12})} \tto_{lx} \metasub{(B(P\ t_{11}))}{x}{B(P\ t_{12})}} \and (\star\star\star\star) } {\esub{(B((P\ t_{11})))}{x}{B(P\ t_{12})} \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}}) }} {B(\esub{(P\ t_{11})}{x}{P\ t_{12}}) \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})}
-\end{mathpar}%
+%{\small\begin{mathpar}
+\inferrule*[right={(def. $B$)}]{\inferrule*[right={(T)}]{(\star\star\star) \and (\dagger)}{\esub{(B(P\ t_{11}))}{x}{B(P\ t_{12})} \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})}}{B(\esub{(P\ t_{11})}{x}{P\ t_{12}}) \tto_{lx} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})}
+\end{mathpar}}%
 
-%\noindent% where $(\star\star\star)$ is proved by lemma [pure_pix] since $\to_x \subseteq \to_{lx}$, and $(\star\star\star\star)$ is given by the reduction
-
-%\begin{equation}\label{red:lx}\metasub{(B((P\ t_{11})))}{x}{B(P\ t_{12})}  \tto_{lx}  B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})\end{equation}%
-
-%\noindent% which is the tricky part of the proof. It is proved using the fact that $\to_{lx}$ steps can simulate $\beta$-steps as proved by Lemma [pure_beta_lx]. $\hfill\Box$ %\end{proofbox}% *)
+%\noindent% where $(\star\star\star)$ is the reduction $\esub{(B(P\ t_{11}))}{x}{B(P\ t_{12})} \tto_{lx} \metasub{(B(P\ t_{11}))}{x}{B(P\ t_{12})}$, an $x$-reduction given by Lemma (%\rocqsrc*{lx_nom.pure_scx}{\coqdoclemma{pure\_scx}}%), since $B(P\ t_{11})$ is pure (Lemmas %\rocqsrc*{lx_nom.pure_B}{\coqdoclemma{pure\_B}}% and %\rocqsrc*{lx_nom.pure_P}{\coqdoclemma{pure\_P}}%), and $\to_x \subseteq \to_{lx}$. The reduction $(\dagger)$ is the tricky part of the proof: Lemma %\rocqsrc*{lx_nom.pure_m_subst_refltrans_beta_B}{\coqdoclemma{pure\_m\_subst\_refltrans\_beta\_B}}% gives $\metasub{(B(P\ t_{11}))}{x}{B(P\ t_{12})} \tto_{\beta} B(\metasub{(P\ t_{11})}{x}{P\ t_{12}})$, and this $\beta$-reduction is simulated by an $lx$-reduction because $\to_{lx}$-steps simulate $\beta$-steps on pure terms (Lemma %\rocqsrc*{lx_nom.pure_beta_lx}{\coqdoclemma{pure\_beta\_lx}}%). $\hfill\Box$ %\end{proofbox}% *)
 Qed.  
 
 (** Finally, the last part of the second diagram in %(\ref{lx:zprop-proof})% is proved by the next lemma: *)
@@ -1478,10 +1459,18 @@ Proof.
     - apply b_refltrans_beta_P in H. apply refltrans_beta_B.
       + apply pure_P.
       + assumption.
-(** %\begin{mathpar}
- \inferrule{\inferrule{\inferrule{t_1 \to_b t_2}{P\ t_1 \tto_{\beta} P\ t_2}}{B(P\ t_1) \tto_{\beta} B(P\ t_2)}}{B(P\ t_1) \tto_{lx} B(P\ t_2)}
-\end{mathpar}% $\hfill\Box$ *)
 Qed.
+(** %\begin{proofbox}% The proof goes through $\beta$-reduction, and it is summarized by the following derivation:
+%\begin{mathpar} \inferrule*[Right={($c$)}]{\inferrule*[Right={($b$)}]{\inferrule*[Right={($a$)}]{t_1 \to_b t_2}{P\ t_1 \tto_{\beta} P\ t_2}}{B(P\ t_1) \tto_{\beta} B(P\ t_2)}}{B(P\ t_1) \tto_{lx} B(P\ t_2)}
+\end{mathpar}%
+%\noindent% where
+%\begin{itemize}
+\item (a) is Lemma (\rocqsrc*{lx_nom.b_refltrans_beta_P}{\coqdoclemma{b\_refltrans\_beta\_P}}): $P$ maps each $b$-step to a $\beta$-reduction. In fact, $P$ turns every explicit substitution into a metasubstitution, so the $b$-step $(\lambda_x.t)\ u \to_b \esub{t}{x}{u}$ becomes the $\beta$-step $(\lambda_x.P\ t)\ (P\ u) \to_{\beta} \metasub{(P\ t)}{x}{P\ u}$;
+\item (b) is Lemma (\rocqsrc*{lx_nom.refltrans_beta_B}{\coqdoclemma{refltrans\_beta\_B}}): $B$ preserves $\beta$-reductions that start from a pure term, and $P\ t_1$ is pure by Lemma (\rocqsrc*{lx_nom.pure_P}{\coqdoclemma{pure\_P}});
+\item (c) is Lemma (\rocqsrc*{lx_nom.pure_refltrans_beta_lx}{\coqdoclemma{pure\_refltrans\_beta\_lx}}): on pure terms, every $\beta$-reduction is simulated by an $lx$-reduction, and $B(P\ t_1)$ is pure by Lemmas (\rocqsrc*{lx_nom.pure_B}{\coqdoclemma{pure\_B}}) and (\rocqsrc*{lx_nom.pure_P}{\coqdoclemma{pure\_P}}).
+\end{itemize}
+\vspace{-\baselineskip}%
+$\hfill\Box$ %\end{proofbox}% *)
 
 (** The diagrams in (%\ref{lx:zprop-proof}%) are formalized as the predicate [Z_comp_aeq] used in the next lemma: *)
 Lemma lambda_x_Z_comp_aeq: Z_comp_aeq lambdax.
@@ -1508,6 +1497,15 @@ Proof.
             **** apply step_b_refltrans_lx_B_P. assumption.
             **** apply refltrans_lx_B_P. assumption.
 Qed.
+(** %\begin{proofbox}% We take $R_1 = {\to_x}$, $R_2 = {\to_b}$, $f_1 = P$ and $f_2 = B$, and check the conditions of [Z_comp_aeq] against the diagrams in %(\ref{lx:zprop-proof})%:
+%\begin{itemize}
+\item ${\to_{lx}} = {\to_x} \cup {\to_b}$, by the definition of $\to_{lx}$;
+\item left diagram: if $t_1 \to_x t_2$, then $P\ t_1 =_{\alpha} P\ t_2$ by Lemma \rocqsrc*{lx_nom.scx_P}{\coqdoclemma{scx\_P}}, so the green arrow is an $\alpha$-equivalence, and then $B(P\ t_1) =_{\alpha} B(P\ t_2)$ (orange arrow) by Lemma \rocqsrc*{lx_nom.aeq_B}{\coqdoclemma{aeq\_B}}. The blue arrows follow from $t \tto_x P\ t$, for every $t$ (Lemma \rocqsrc*{lx_nom.refltrans_P}{\coqdoclemma{refltrans\_P}}): we get $t_2 \tto_x P\ t_2 =_{\alpha} P\ t_1$. The red arrow follows from Lemma \rocqsrc*{lx_nom.pure_refltrans_B}{\coqdoclemma{pure\_refltrans\_B}}, since $P\ t_1$ is pure (Lemma \rocqsrc*{lx_nom.pure_P}{\coqdoclemma{pure\_P}});
+\item right diagram: if $t_1 \to_b t_2$, then Lemmas \rocqsrc*{lx_nom.step_b_refltrans_lx_B_P}{\coqdoclemma{step\_b\_refltrans\_lx\_B\_P}} and \rocqsrc*{lx_nom.refltrans_lx_B_P}{\coqdoclemma{refltrans\_lx\_B\_P}} give $t_2 \tto_{lx} B(P\ t_1)$ and $B(P\ t_1) \tto_{lx} B(P\ t_2)$, respectively. That is, $B \circ P$ has the weak Z property for $\to_b$ with respect to $\to_{lx}$;
+\item finally, $B \circ P$ is compatible with $\alpha$-equivalence, by Lemmas \rocqsrc*{lx_nom.aeq_P}{\coqdoclemma{aeq\_P}} and \rocqsrc*{lx_nom.aeq_B}{\coqdoclemma{aeq\_B}}.
+\end{itemize}
+\vspace{-\baselineskip}%
+$\hfill\Box$ %\end{proofbox}% *)
 (** Therefore, we can conclude that the reduction $\to_{lx}$ satisfies the compositional Z-property modulo $\alpha$-equivalence. In %\cite{fmm2021}%, we formalized that the compositional Z property implies the Z property, which in turn implies confluence. These intermediate results are used in the next theorem to conclude that $\to_{lx}$ is confluent. *)
 Theorem lambda_x_is_confluent: Confl lambdax.
 (* begin show *)

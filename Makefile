@@ -144,7 +144,7 @@ debug-doc:
 # Open pdf with evince
 .PHONY: pdf
 pdf:
-	zathura latex/sbmf2026.pdf&
+	evince latex/sbmf2026.pdf&
 
 # This should be the last rule, to handle any targets not declared above
 %: invoke-coqmakefile
