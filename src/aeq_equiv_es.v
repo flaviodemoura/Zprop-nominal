@@ -9,7 +9,7 @@ Require Export Metalib.LibLNgen.
 Require Import infra_nom.
 (* end hide *)
 
-(** In the $\lambda$-calculus, terms that differ only by the name of bound variables are considered equivalent. This equivalence is called $\alpha$-equivalence, and it is defined by the following inference rules (cf. %\cite{urbanNominalUnification2004}%):
+(** In the $\lambda$-calculus, terms that differ only in the names of their bound variables are considered equivalent. This equivalence is called $\alpha$-equivalence, and it is defined by the following inference rules (cf. %\cite{urbanNominalUnification2004}%):
 
 %\begin{mathpar}
 \inferrule*[Left={({\rm\it aeq\_var})}]{~}{x =_\alpha x} \and\and \inferrule*[Right={({\rm\it aeq\_abs\_same})}]{t_1 =_\alpha t_2}{\lambda_x.t_1 =_\alpha \lambda_x.t_2} \\
@@ -24,7 +24,7 @@ In %\cite{limaFormalizedExtensionSubstitution2023}%, this definition was extende
 \inferrule*[Right={({\rm\it aeq\_sub\_diff})}]{t_2 =_\alpha t_2' \and x \neq y \and x \notin fv(t_1') \and t_1 =_\alpha \swap{y}{x}{t_1'}}{\esub{t_1}{x}{t_2} =_\alpha \esub{t_1'}{y}{t_2'}} 
 \end{mathpar}%
 
-In the formalization, the resulting relation is called %\rocqsrc*{aeq_equiv_es.aeq}{\coqdocinductive{aeq}}%. We prove its basic properties, reflexivity (%\rocqsrc*{aeq_equiv_es.aeq_refl}{\coqdoclemma{aeq\_refl}}%), symmetry (%\rocqsrc*{aeq_equiv_es.aeq_sym}{\coqdoclemma{aeq\_sym}}%) and transitivity (%\rocqsrc*{aeq_equiv_es.aeq_trans}{\coqdoclemma{aeq\_trans}}%), as well as the facts that $\alpha$-equivalence is stable under swapping (%\rocqsrc*{aeq_equiv_es.aeq_swap}{\coqdoclemma{aeq\_swap}}%) and that $\alpha$-equivalent terms have the same free variables (%\rocqsrc*{aeq_equiv_es.aeq_fv_nom}{\coqdoclemma{aeq\_fv\_nom}}%). *)
+In the formalization, the resulting relation is called %\rocqsrc*{aeq_equiv_es.aeq}{\coqdocinductive{aeq}}%. We prove its basic properties, namely reflexivity (%\rocqsrc*{aeq_equiv_es.aeq_refl}{\coqdoclemma{aeq\_refl}}%), symmetry (%\rocqsrc*{aeq_equiv_es.aeq_sym}{\coqdoclemma{aeq\_sym}}%) and transitivity (%\rocqsrc*{aeq_equiv_es.aeq_trans}{\coqdoclemma{aeq\_trans}}%), as well as the facts that $\alpha$-equivalence is stable under swapping (%\rocqsrc*{aeq_equiv_es.aeq_swap}{\coqdoclemma{aeq\_swap}}%) and that $\alpha$-equivalent terms have the same free variables (%\rocqsrc*{aeq_equiv_es.aeq_fv_nom}{\coqdoclemma{aeq\_fv\_nom}}%). *)
 
 (* begin hide *)
 Reserved Notation "t1 =α t2"

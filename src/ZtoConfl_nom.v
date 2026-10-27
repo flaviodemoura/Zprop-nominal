@@ -143,7 +143,6 @@ Proof.
   - apply refltrans_n_sub_in. assumption.
 Qed.
 
-
 (** * Compositional Z property modulo implies Confluence *)
 (**
 
@@ -151,7 +150,6 @@ In this section, we instantiate the set $A$ of the generic formalization in %\ci
 
     $\centerline{\xymatrix{ & t_1 \ar@{->>}[dl] \ar@{->>}[dr] & \\ t_2
     \ar@{.>>}[dr] & & t_3 \ar@{.>>}[dl] \\ & t_4 & }}$
-
 
 *)
 
@@ -175,40 +173,6 @@ A binary relation [R] has the Z property if there exists a function [f] that has
 
 Definition Z_prop (R: Rel n_sexp) := exists f, (f_is_Z R f).
 
-(*
-Theorem Z_prop_implies_Confl: forall R, Z_prop R -> Confl R.
-Proof.
-  intros R HZ_prop. unfold Z_prop, Confl in *. intros t1 t2 t3 Hrefl1 Hrefl2. destruct HZ_prop as [g HZ_prop]. generalize dependent t3. induction Hrefl1 as [t1 t2 Haeq' | t1 t1' t2 HR Hrefl1' | t1 t1' t2 Haeq' Hrefl1']. 
-  - intros t3 Hrefl2. exists t3; split.
-    +  apply refltrans_composition with t1.
-       * apply refl. apply aeq_sym. assumption.
-       * assumption.
-    + apply refl. apply aeq_refl. 
-  - intros t3 Hrefl2. 
-    assert (Hg1: refltrans R t1' (g t1)).
-    { apply HZ_prop; assumption.  } 
-    assert (Hg2: refltrans R t1 (g t1)).
-    { apply rtrans with t1'; assumption.  }
-    apply HZ_prop in HR. destruct HR as [HR' HR]. clear HR. generalize dependent t1'. induction Hrefl2 as [t1 t3 Haeq' | t1 t1'' t3 HR Hrefl2' | t1 t1'' t3 Haeq' Hrefl2'].  
-    + intros t1' HR Hrefl1 IHHrefl1 Hg1. apply IHHrefl1 in Hg1. destruct Hg1 as [x Hg1]. exists x. split.
-      * apply Hg1.
-      * apply refltrans_composition with t1.
-        ** apply refl. apply aeq_sym. assumption.
-        ** apply refltrans_composition with (g t1).
-           *** assumption.
-           *** apply Hg1.
-    + intros t1' HR' Hrefl1 IHHrefl1 Hg1. apply IHHrefl1 in Hg1. destruct Hg1 as [x Hg1]. apply IHHrefl2' with t1'.
-      * apply refltrans_composition with (g t1); apply HZ_prop; assumption.
-      * apply HZ_prop in HR. apply refltrans_composition with (g t1).
-        ** assumption.
-        ** apply HR.
-      * assumption.
-      * apply IHHrefl1.
-      * apply HZ_prop in HR. apply refltrans_composition with (g t1).
-        ** assumption.
-        ** apply HR.
-    + intros t1' HR Hrefl1 IHHrefl1 Hg1. Abort.
-*)
   
 
 Definition Z_prop_aeq (R: Rel n_sexp) := exists f, (f_is_Z R f) /\ (forall t1 t2, t1 =α t2 -> f t1 =α f t2).

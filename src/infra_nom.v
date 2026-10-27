@@ -79,18 +79,18 @@ Qed.
 
 (** * Introduction %\label{sec:intro}% *)
 
-(** We present a framework for studying properties of extensions of the $\lambda$-calculus %\cite{barendregtLambdaCalculusIts1984a}%, which is based on a nominal approach %\cite{gabbayNewApproachAbstract2002}%. In the nominal setting, variables are represented by atoms, structureless entities with a decidable equality. Therefore different names mean different atoms and different variables. The nominal approach is close to the usual paper and pencil notation used in $\lambda$-calculus, whose grammar of terms is given by:
+(** We present a framework for studying properties of extensions of the $\lambda$-calculus %\cite{barendregtLambdaCalculusIts1984a}%, based on the nominal approach %\cite{gabbayNewApproachAbstract2002}%. In the nominal setting, variables are represented by atoms, structureless entities with a decidable equality. Therefore, different names denote different atoms, and hence different variables. The nominal approach is close to the usual paper-and-pencil notation of the $\lambda$-calculus, whose grammar of terms is given by:
 
 %\begin{equation}\label{lambda:grammar}
  t ::= x \mid \lambda_x.t \mid t\ t
 \end{equation}%
 
-%\noindent% where $x$ represents a variable taken from an enumerable set, $\lambda_x.t$ is an abstraction, and $t\ t$ is an application. The abstraction is the only binding operator: in the expression $\lambda_x.t$, $x$ binds in $t$, called the scope of the abstraction. This means that every free occurrence of $x$ in $t$ becomes bound in $\lambda_x.t$. A variable that is not in the scope of an abstraction is free. A variable in a term is either bound or free, but note that a variable can occur both bound and free in the same term, as in $(\lambda_y. y)\ y$. The main rule of the $\lambda$-calculus, named $\beta$-reduction, is given by:
+%\noindent% where $x$ represents a variable taken from an enumerable set, $\lambda_x.t$ is an abstraction, and $t\ t$ is an application. The abstraction is the only binding operator: in the expression $\lambda_x.t$, $x$ binds in $t$, called the scope of the abstraction. This means that every free occurrence of $x$ in $t$ becomes bound in $\lambda_x.t$. An occurrence of a variable that is not bound is free. Each occurrence of a variable is either bound or free, but the same variable can occur both bound and free in a term, as in $(\lambda_y. y)\ y$. The main rule of the $\lambda$-calculus, named $\beta$-reduction, is given by:
 
 %\begin{equation}\label{lambda:beta}
  (\lambda_x.t)\ u \to_{\beta} \metasub{t}{x}{u}
 \end{equation}%
-%\noindent% where $\metasub{t}{x}{u}$ represents the result of substituting all free occurrences of variable $x$ in $t$ with $u$, renaming bound variables whenever needed to avoid capturing free variables of $u$. We call $t$ the body of the metasubstitution, and $u$ its argument. In other words, $\metasub{t}{x}{u}$ is a metanotation for a capture-free substitution. For instance, the $\lambda$-term $(\lambda_x\lambda_y.x\ y)\ y$ has both bound and free occurrences of the variable $y$, and in order to $\beta$-reduce it, one has to substitute the free variable $y$ for all free occurrences of the variable $x$ in the term $(\lambda_y.x\ y)$. A straight substitution would capture the free variable $y$, %{\it i.e.}% the free occurrence of $y$ before the $\beta$-reduction would become bound after the $\beta$-reduction step. A renaming of bound variables avoids such a capture: in this example, one can take an $\alpha$-equivalent%\footnote{A formal definition of this notion will be given later in this section.}% term, say $(\lambda_z.x\ z)$, and perform the $\beta$-step correctly as $(\lambda_x\lambda_y.x\ y)\ y \to_{\beta} \lambda_z.y\ z$. Renaming of variables in the nominal setting is done via a name-swapping, which is formally defined at the level of variables as follows:
+%\noindent% where $\metasub{t}{x}{u}$ represents the result of substituting all free occurrences of the variable $x$ in $t$ with $u$, renaming bound variables whenever needed to avoid capturing free variables of $u$. We call $t$ the body of the metasubstitution, and $u$ its argument. In other words, $\metasub{t}{x}{u}$ is a metanotation for a capture-free substitution. For instance, the $\lambda$-term $(\lambda_x\lambda_y.x\ y)\ y$ has both bound and free occurrences of the variable $y$, and in order to $\beta$-reduce it, one has to substitute the free variable $y$ for all free occurrences of the variable $x$ in the term $(\lambda_y.x\ y)$. A naive substitution would capture the free variable $y$, %{\it i.e.}%, the free occurrence of $y$ before the $\beta$-reduction would become bound after the $\beta$-reduction step. A renaming of bound variables avoids such a capture: in this example, one can take an $\alpha$-equivalent%\footnote{A formal definition of this notion will be given later in this section.}% term, say $(\lambda_z.x\ z)$, and perform the $\beta$-step correctly as $(\lambda_x\lambda_y.x\ y)\ y \to_{\beta} \lambda_z.y\ z$. In the nominal setting, variables are renamed via name swapping, which is defined on variables as follows:
 
 $\vswap{x}{y}{z} := \left\{ \begin{array}{ll}
 y, & \mbox{ if } z = x; \\
@@ -120,13 +120,13 @@ In the previous example, the variable capture can be avoided by applying a swap 
   \lambda_z.(\metasub{(\swap{y}{z}{t_1})}{x}{u}), & \mbox{ if } t = \lambda_y.t_1, x \neq y \\ & \mbox{ and } \\ & z\notin fv(t\ u) \cup \{x\}.
  \end{array}\right.
 \end{equation}
-\noindent% where $fv(t)$ denotes the set of free variables of $t$. The last case of the definition of metasubstitution is the one that avoids variable capture by applying a swap to the body of the abstraction before performing the metasubstitution. In this case, $z$ is a fresh variable that does not occur free in $t$ or in $u$, and it can be chosen arbitrarily. In our formalization, we will use a function called [atom_fresh] to choose such a fresh variable.
+\noindent% where $fv(t)$ denotes the set of free variables of $t$. The last case of the definition of metasubstitution is the one that avoids variable capture by applying a swap to the body of the abstraction before performing the metasubstitution. In this case, $z$ is a fresh variable, that is, a variable different from $x$ that does not occur free in $t$ or in $u$, and it can be chosen arbitrarily. In our formalization, it is chosen by the function [atom_fresh].
 
 A reduction relation $R$ is confluent (%\rocqsrc*{ZtoConfl_nom.Confl}{\coqdocdefinition{Confl}}%) if any two reductions starting from the same term can be joined, that is, if $t \tto_R t_1$ and $t \tto_R t_2$, then there exists a term $t_3$ such that $t_1 \tto_R t_3$ and $t_2 \tto_R t_3$, as in the following diagram, where $\tto_R$ is the reflexive-transitive closure of $R$ and the dotted arrows are existentially quantified:
 
   $\centerline{\xymatrix{ & t \ar@{->>}[dl]_R \ar@{->>}[dr]^R & \\ t_1 \ar@{.>>}[dr]_R & & t_2 \ar@{.>>}[dl]^R \\ & t_3 & }}$
 
-The Z property %\cite{oostromDraftYourMind2007,dehornoy2008z}% is a sufficient condition for confluence. In a nutshell, a function $f$ has the Z property for a binary relation $R$ if the following diagram holds:
+The Z property %\cite{oostromDraftYourMind2007,dehornoy2008z}% is a sufficient condition for confluence. Informally, a function $f$ has the Z property for a relation $R$ if, whenever $t_1 \to_R t_2$, we have $t_2 \tto_R f\,t_1 \tto_R f\,t_2$, as in the following diagram:
 
   $\centerline{\xymatrix{ t_1 \ar[r]_R & t_2 \ar@{.>>}[dl]^R\\ f t_1 \ar@{.>>}[r]_R & f t_2}}$
 
@@ -134,7 +134,7 @@ The compositional Z property %\cite{nakazawaCompositionalConfluenceProofs2016}% 
 
 The main contributions of this work are as follows:
 - a formalization of the (compositional) Z property modulo $\alpha$-equivalence for nominal terms. The generic formalization in %\cite{fmm2021}% states the Z property and the compositional Z property for an arbitrary relation over an abstract set, and proves that they imply confluence. We instantiate this set with nominal terms with explicit substitutions, and adapt the definitions so that the functions involved are compatible with $\alpha$-equivalence.
-- a toolkit of properties of the metasubstitution on nominal terms, built around the Substitution Lemma for calculi with explicit substitutions formalized in %\cite{limaFormalizedExtensionSubstitution2023}% (%\rocqsrc*{msubst.m_subst_lemma}{\coqdoclemma{m\_subst\_lemma}}%). The Substitution Lemma is the key ingredient to show that the complete development function $B$ commutes with the metasubstitution up to $\beta$-reduction (Lemma %\rocqsrc*{lx_nom.pure_m_subst_refltrans_beta_B}{\coqdoclemma{pure\_m\_subst\_refltrans\_beta\_B}}%), which is the tricky step of the confluence proof.
+- a toolkit of properties of the metasubstitution on nominal terms, built around the Substitution Lemma for calculi with explicit substitutions formalized in %\cite{limaFormalizedExtensionSubstitution2023}% (%\rocqsrc*{msubst.m_subst_lemma}{\coqdoclemma{m\_subst\_lemma}}%). The Substitution Lemma is the key ingredient to show that the complete development function $B$ commutes with the metasubstitution up to $\beta$-reduction (Lemma %\rocqsrc*{lx_nom.pure_m_subst_refltrans_beta_B}{\coqdoclemma{pure\_m\_subst\_refltrans\_beta\_B}}%), which is the most delicate step of the confluence proof.
 - a formalization of the confluence of the $\lambda_x$-calculus that combines the two previous contributions. The reduction $\to_{lx}$ is split into the $b$-reduction, which creates explicit substitutions, and the $x$-reduction, which propagates and eliminates them. The function $P$, which eliminates all explicit substitutions, and the function $B$ are shown to satisfy the compositional Z property modulo $\alpha$-equivalence (%\rocqsrc*{lx_nom.lambda_x_Z_comp_aeq}{\coqdoclemma{lambda\_x\_Z\_comp\_aeq}}%), where the Substitution Lemma is used to simulate $b$-steps by $\beta$-steps. The theorems of the first contribution then give the confluence of $\to_{lx}$ (%\rocqsrc*{lx_nom.lambda_x_is_confluent}{\coqdoclemma{lambda\_x\_is\_confluent}}%).
 
 To the best of our knowledge, this is the first nominal formalization of the confluence of the $\lambda_x$-calculus via the compositional Z property. The rest of the paper is organized as follows. In Subsection 1.1, we extend the syntax with an explicit substitution operator, and define $\alpha$-equivalence and the metasubstitution on the resulting terms, together with their main properties. In Section 2, we present the $\lambda_x$-calculus and prove its confluence via the compositional Z property. In Section 3, we discuss related work, conclude, and outline future work. *)
@@ -189,16 +189,16 @@ Qed.
 
 (** ** An Explicit Substitution Operator *)
 
-(** In this section, we extend the grammar (%\ref{lambda:grammar}%) with a new constructor called an explicit substitution operator:
+(** In this subsection, we extend the grammar (%\ref{lambda:grammar}%) with a new constructor called an explicit substitution operator:
 
 %\begin{equation}\label{es:grammar}
   t ::= x \mid \lambda_x.t \mid t\ t \mid \esub{t}{x}{u}
 \end{equation}%
-%\noindent% where $\esub{t}{x}{u}$ represents a term with a pending substitution that will be evaluated by specific rules of a substitution calculus. The intended meaning of the explicit substitution is that it simulates the metasubstitution. This formalization aims to be a generic framework applicable to any calculus with explicit substitutions using a named notation for variables. Therefore, we do not fix rules for how the metasubstitution is to be simulated, but it is important to keep in mind that this is not a trivial task, since one can easily lose important properties of the original $\lambda$-calculus in the process %\cite{melliesTypedLcalculiExplicit1995,guillaumeCalculusDoesNot2000}%.
+%\noindent% where $\esub{t}{x}{u}$ represents a term with a pending substitution that will be evaluated by specific rules of a substitution calculus. The explicit substitution is intended to simulate the metasubstitution. This formalization aims to be a generic framework applicable to any calculus with explicit substitutions using a named notation for variables. Therefore, we do not fix the rules that simulate the metasubstitution. Designing such rules is not a trivial task, since one can easily lose important properties of the original $\lambda$-calculus in the process %\cite{melliesTypedLcalculiExplicit1995,guillaumeCalculusDoesNot2000}%.
 
 Calculi with explicit substitutions are formalisms that deconstruct the metasubstitution operation into finer-grained steps, thereby functioning as an intermediary between the $\lambda$-calculus and its practical implementations: they shed light on the execution models of higher-order languages. In fact, developing a calculus with explicit substitutions that is faithful to the $\lambda$-calculus, in the sense of preserving some of its desired properties, has been the main motivation behind the long list of calculi with explicit substitutions invented over the last decades %\cite{abadiExplicitSubstitutions1991,roseExplicitSubstitutionNames2011,benaissaLnCalculusExplicit1996,curienConfluencePropertiesWeak1996,munozConfluencePreservationStrong1996,kamareddineExtendingLcalculusExplicit1997a,blooExplicitSubstitutionEdge1999,davidLambdacalculusExplicitWeakening2001,kesnerTheoryExplicitSubstitutions2009a}%.
 
-The following inductive definition corresponds to the grammar (%\ref{es:grammar}%), where the explicit substitution constructor, named [n_sub], has a special notation. Instead of writing [n_sub t x u], we will write [[x := u] t] similarly to (%\ref{es:grammar}%). Accordingly, [n_sexp] denotes the set of nominal $\lambda$-expressions equipped with an explicit substitution operator, which, for simplicity, we will refer to as just "terms". Note that all code snippets are clickable and linked to their source repository. *)
+The following inductive definition corresponds to the grammar (%\ref{es:grammar}%), where the explicit substitution constructor, named [n_sub], has a special notation. Instead of writing [n_sub t x u], we write [[x := u] t], as in (%\ref{es:grammar}%). Accordingly, [n_sexp] denotes the set of nominal $\lambda$-expressions equipped with an explicit substitution operator, which we simply call "terms". The Rocq logo on each code snippet links to the corresponding definition in the source repository. *)
 
 Inductive n_sexp : Set :=
 | n_var (x:atom)
@@ -344,19 +344,11 @@ Lemma notin_fv_nom_swap_2 : forall z y t, z `notin` fv_nom (swap y z t) -> y `no
 Proof.
   intros. induction t; simpl in *; unfold vswap in H; default_simp.
 Qed.
-(* Lemma notin_fv_nom_swap_2 : forall z y t, z `notin` fv_nom (swap y z t) -> y `notin` fv_nom t.
-Proof.
-  intros z y t Hnotin. induction t; simpl in *; unfold vswap in Hnotin; default_simp.
-Qed. *)
 
 Lemma notin_fv_nom_swap_remove: forall t x y z, x <> y ->  x <> z -> x `notin` fv_nom (swap z y t) -> x `notin` fv_nom t.
 Proof.
   intros. induction t; simpl in *; unfold vswap in *; default_simp.
 Qed.
-(* Lemma notin_fv_nom_swap_remove: forall t x y z, x <> y ->  x <> z -> x `notin` fv_nom (swap z y t) -> x `notin` fv_nom t.
-Proof.
-  intros t x y z Hxy Hxz Hnotin. induction t; simpl in *; unfold vswap in *; default_simp.
-Qed. *)
 
 Lemma notin_fv_nom_swap_neq: forall t x y z, x <> y ->  x <> z -> x `notin` fv_nom t -> x `notin` fv_nom (swap z y t).
   Proof.
@@ -392,38 +384,6 @@ Proof.
     + apply notin_union_2 in Hnotin. apply IHt2; assumption.
 Qed.
   
-(* Lemma fv_nom_remove_swap_inc: forall t x y, x <> y -> y `notin` fv_nom t -> x `notin` fv_nom (swap x y t).
-Proof.
-  induction t as [z | z t1 | t1 IHt1 t2 IHt2 | t1 IHt1 z t2 IHt2 ].
-  - intros x y Hneq Hnotin. simpl in *. apply notin_singleton_1 in Hnotin. unfold vswap. destruct (z == x).
-    + apply notin_singleton. symmetry. assumption.
-    + destruct (z == y).
-      * contradiction.
-      * apply notin_singleton. assumption.
-  - intros x y Hneq Hnotin. simpl in *. apply notin_remove_1 in Hnotin. destruct Hnotin as [Heq | Hnotin].
-    + subst. unfold vswap. destruct (y == x).
-      * symmetry in e. contradiction.
-      * rewrite eq_dec_refl. apply notin_remove_3. reflexivity.
-    + unfold vswap. destruct (z == x).
-      * apply notin_remove_2. apply IHt1; assumption.
-      * destruct (z == y).
-        ** apply notin_remove_3. reflexivity.
-        ** apply notin_remove_2. apply IHt1; assumption.
-  - intros x y Hneq Hnotin. simpl in *. apply notin_union.
-    + apply IHt1.
-      * assumption.
-      * apply notin_union_1 in Hnotin; assumption.
-    + apply IHt2.
-      * assumption.
-      * apply notin_union_2 in Hnotin. assumption.
-  - intros x y Hneq Hnotin. simpl in *. apply notin_union.
-    + apply notin_union_1 in Hnotin. apply notin_remove_1 in Hnotin. destruct Hnotin as [Heq | Hnotin].
-      * subst. unfold vswap. destruct (y == x).
-        ** symmetry in e. contradiction.
-        ** rewrite eq_dec_refl. apply notin_remove_3. reflexivity.
-      * apply notin_remove_2. apply IHt1; assumption.
-    + apply notin_union_2 in Hnotin. apply IHt2; assumption.
-Qed. *)
 
 (* Induction Principles *)
 
@@ -435,19 +395,6 @@ Proof.
   - intros m Hlt; inversion Hlt.
   - intros n' H' m Hlt. apply IH. intros m0 Hlt'. apply H'. lia. 
 Qed.
-
-(* The standard proof strategy used so far is induction on the structure of terms. Nevertheless, the builtin induction principle automatically generated in Coq for the inductive definition [n_sexp] is not strong enough due to swappings:
-
-<<
-forall P :n_sexp -> Prop,
- (forall x:atom, P(n_var x)) ->
- (forall (x:atom) (t:n_sexp), P t -> P(n_abs x t)) ->
- (forall t1:n_sexp, P t1 -> forall t2:n_sexp, P t2 -> P(n_app t1 t2)) ->
- (forall t1:n_sexp, P t1 -> forall (x:atom) (t2:n_sexp), P t2 -> P([x:=t2]t1)) ->
-       forall t:n_sexp, P t
->>
-
-In fact, in general, the induction hypothesis in the abstraction case (resp. explicit substitution case) refers to the body [t] of the abstraction (resp. [t1] of the explicit substitution), while the goal involves a swap acting on the body of the abstraction (resp. explicit substitution). In order to circumvent this problem, we defined a customized induction principle based on the size of terms: *)
 
 Lemma n_sexp_induction: forall P : n_sexp -> Prop, (forall x, P (n_var x)) ->
  (forall t1 z, (forall t2 x y, size t2 = size t1 -> P (swap x y t2)) -> P (n_abs z t1)) ->
@@ -474,15 +421,6 @@ Proof.
       ++ rewrite swap_size_eq. rewrite H0. simpl in Heqn. rewrite Heqn. lia. 
       ++ reflexivity.
 Qed. 
-(* %\noindent% which states that in order to conclude that a certain property $P$ holds for all terms, we need to prove that:
-%\begin{enumerate}
- \item $P$ must hold for any variable;
- \item If $P$ holds for the term $\swap{x}{y}{t_2}$, where $t_1$ and $t_2$ have the same size, then it also holds for the abstraction $\lambda_z.t_1,\forall x, y, z, t_1$ and $t_2$;
- \item If $P$ holds for the terms $t_1$ and $t_2$ the it also holds for the application $t_1\ t_2$;
- \item If $P$ holds for the term $t_3$ and for the term $\swap{x}{y}{t_2}$, where $t_1$ and $t_2$ have the same size, then it also holds for the explicit substitution $\esub{t_1}{z}{t_3},\forall x, y, z, t_1, t_2$ and $t_3$.
-\end{enumerate}%
-
-The following lemma is a first example of the use of the [n_sexp_induction] principle: *)  
 
 Lemma notin_fv_nom_equivariance: forall t x' x y, x' `notin` fv_nom t -> vswap x y x'  `notin` fv_nom (swap x y t).
 Proof.
@@ -504,14 +442,6 @@ Proof.
         ** assumption.
     + apply notin_union_2 in Hfv. apply IHt1; assumption. 
 Qed.
-(* %\noindent{\bf Proof.}% Note that in the paper and pencil notation, this lemma states that: %\newline%
-
-If $x' \notin fv\_nom(t)$ then $\vswap{x}{y}{x'} \notin fv\_nom(\swap{x}{y}{t})$.%\newline%
-
-%\noindent% The proof is by induction on the size of the term $t$.
-%\begin{enumerate} \item If $t$ is a variable, say $z$, then $x' \neq z$ by hypothesis, and we need to prove that $\vswap{x}{y}{x'} \neq \vswap{x}{y}{z}$. We conclude by lemma $swap\_neq$. \item If is an abstraction, say $t = \lambda_z. t_1$, then we have by induction hypothesis that if $x' \notin \swap{x}{y}{t_2}$ then $\vswap{x_0}{y_0}{x'} \notin \swap{x_0}{y_0}{\swap{x}{y}{t_2}}$ for any term $t_2$ with the same size as $t_1$, and any variables $x, y, x_0$ and $y_0$. At this point is important to notice that an structural induction would generate an induction hypothesis with $t_1$ only, which is not strong enough to prove the goal $\vswap{x}{y}{x'} \notin fv\_nom(\swap{x}{y}{\lambda_z. t_1})$ that has $\swap{x}{y}{t_1}$ (and not $t_1$ alone!) after the propagation of the swap. In addition, we have by hypothesis that $x' \notin fv\_nom(t_1) \backslash \{z\}$. This means that either $x' = z$ or $x' \notin fv\_nom(t_1)$, and there are two subcases: \begin{enumerate} \item If $x' = z$ then the goal is $\vswap{x}{y}{z} \notin fv\_nom(\swap{x}{y}{\lambda_z. t_1}) \Leftrightarrow$ $\vswap{x}{y}{z} \notin fv\_nom(\lambda_{\vswap{x}{y}{z}}. \swap{x}{y}{t_1}) \Leftrightarrow$\newline $\vswap{x}{y}{z} \notin fv\_nom(\swap{x}{y}{t_1})\backslash \{\vswap{x}{y}{z}\}$ we are done by lemma $notin\_remove\_3$.\footnote{This is a lemma from Metalib library and it states that {\tt forall (x y : atom) (s : atoms), x = y -> y `notin` remove x s}.} \item Otherwise, $x' \notin fv\_nom(t_1)$, and we conclude using the induction hypothesis taking $x_0=x$, $y_0=y$ and the universally quantified variables $x$ and $y$ of the internal swap as the same variable (it does not matter which one). \end{enumerate} \item The application case is straightforward from the induction hypothesis. \item The case of the explicit substitution, {\it i.e.} when $t = \esub{t_1}{z}{t_2}$, we have to prove that $\vswap{x}{y}{x'} \notin fv\_nom(\swap{x}{y}{(\esub{t_1}{z}{t_2})})$. We then propagate the swap over the explicit substitution operator and show, by the definition of $fv\_nom$, we have to prove that both $\vswap{x}{y}{x'} \notin (fv\_nom (\swap{x}{y}{t_1}))\backslash \{\vswap{x}{y}{z}\}$ and $\vswap{x}{y}{x'} \notin fv\_nom (\swap{x}{y}{t_2})$. \begin{enumerate} \item In the former case, the hypothesis $x' \notin fv\_nom(t_1)\backslash \{z\}$ generates two subcases, either $x' = z$ or $x'\notin fv\_nom(t_1)$, and we conclude with the same strategy of the abstraction case. \item The later case is straightforward by the induction hypothesis. $\hfill\Box$ \end{enumerate}\end{enumerate}%*)
-
-(* The other direction is also true, but we skip the proof that is also by induction on the size of term [t]:*)
 
 Lemma notin_fv_nom_remove_swap: forall t x y z, vswap x y z `notin` fv_nom (swap x y t) -> z `notin` fv_nom t.
 Proof.
