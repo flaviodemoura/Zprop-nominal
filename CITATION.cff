@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this formalization, please cite it as below."
+type: software
+title: "A Nominal Formalization of the Confluence of a Calculus with Explicit Substitutions via the Z Property"
+abstract: >-
+  A formalization in the Rocq Prover (version 9.1.1) of the confluence of the
+  lambda-x calculus, an extension of the lambda-calculus with explicit
+  substitutions. Terms use a nominal representation, and the proof uses the
+  compositional Z property modulo alpha-equivalence. This is the artifact of
+  the SBMF 2026 paper with the same title.
+authors:
+  - family-names: "de Moura"
+    given-names: "Flávio L. C."
+    affiliation: "Universidade de Brasília"
+    orcid: "https://orcid.org/0000-0002-9390-5751"
+repository-code: "https://github.com/flaviodemoura/Zprop-nominal"
+license: MIT
+keywords:
+  - Rocq
+  - confluence
+  - Z property
+  - explicit substitutions
+  - nominal syntax
+  - formal verification
